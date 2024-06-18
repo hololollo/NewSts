@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+		
+		
+	<!-- 
+	
+		* root-context.xml
+		서버 구동과 동시에 web.xml파일을 거쳐서 바로 로딩되는 문서 == preloading
+		=> 서버 구동과 동시에 바로 세팅(Bean등록)해야 하는 내용들을 작성.
+		주로 DB접속정보, 트랜잭션 처리, 외부모듈연결 등등..
+	
+	 -->
+	 
+	  <bean class="org.apache.commons.dbcp.BasicDataSource" id="dataSource" destroy-method="close">
+	 	<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+	 	<property name="url" value="jdbc:oracle:thin:@localhost:1521:xe" />
+	 	<property name="username" value="BCLASS" />
+	 	<property name="password" value="BCLASS" />
+	 		
+	 </bean>
+	 
+	 <!-- 
+	 	객체가 필요할 때 내부적으로 실행되는 코드
+	 	
+	 	BasicDataSource dataSource = new BasicDataSource(); 
+	 	dataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+	 	dataSource.setUrl("jdbc:oracle:thin:@localhost:1521:xe");
+	 	dataSource.setUsername("BCLASS");
+	 	dataSource.setPassword("BCLASS");
+	 	
+	 
+	  -->
+	 <!-- class:경로부터 이름까지 -->
+	 <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+	 	<property name="configLocation" value="classpath:mybatis-config.xml" />
+	 	<property name="dataSource" ref="dataSource" />
+	 
+	 </bean>
+	 
+	 <!-- 
+	 	SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
+	 	sqlSessionFactory.setConfigLocation("classpath:mybatis-config.xml")
+	 	sqlSessionFactory.setDataSource(dataSource);
+	  -->
+	  
+	  <!-- 기본생성자가 없어 객체를 만들 수 없음 -->
+	  <bean class="org.mybatis.spring.SqlSessionTemplate" id="sqlSession">
+	  	<constructor-arg ref="sqlSEssionFactory" />
+	  </bean>
+	  
+	  <!-- SqlSessionTemplate sqlSession = new SqlSessionTemplate(); -->
+	 
+</beans>

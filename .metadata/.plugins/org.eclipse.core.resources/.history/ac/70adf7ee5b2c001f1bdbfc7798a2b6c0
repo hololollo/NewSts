@@ -1,0 +1,23 @@
+package com.kh.spring.member.model.service;
+
+import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+
+//비즈니스 로직을 작성한다.
+// 원할때마다 사용가능토록 @Service bean등록
+@Service
+@RequiredArgsConstructor
+public class MemberServiceImpl implements MemberService {
+	
+	private final SqlSessionTemplate sqlSession;
+	
+	@Override
+	public int returnNum() {
+		return 1;
+	}
+	
+	
+	
+}

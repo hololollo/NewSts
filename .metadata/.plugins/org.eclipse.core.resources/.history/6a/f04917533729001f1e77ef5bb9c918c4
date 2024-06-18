@@ -1,0 +1,28 @@
+package com.kh.spring.hash.model.run;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+public class Run {
+	public static void main(String[] args) {
+		
+		//HashSet : 중복허용 X, 순서유지X, 값만 저장
+		// Value값만 저장. index가 존재하지 않는다. => 중복허용X, 순서보장x(SET의 특징)
+		
+		//문자열만 담을 수 있는 HashSet
+		// <> : 제네릭(개발자의 편의를 위해 존재.) 아래는 스트링 제네릭이라고 부름.
+		HashSet<String> set = new HashSet();
+		
+		List<String> list = new ArrayList<>();
+		List l = new ArrayList();
+		
+		/*
+		 * 제네릭 : 개발자의 편의를 위해서 존재.
+		 * 쓰는 이유
+		 * 1. 실수방지용! 혹여나 의도하지 않는 타입의 
+		 */
+		
+		
+	}
+}

@@ -1,0 +1,10 @@
+package com.kh.spring.hash.model.run;
+
+public class Run {
+	public static void main(String[] args) {
+		
+		//HashSet : 중복허용 X, 순서유지X, 값만 저장
+		// Value값만 저장. index가 존재하지 않는다. => 중복허용X, 순서보장x
+		
+	}
+}

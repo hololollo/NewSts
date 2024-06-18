@@ -1,0 +1,8 @@
+package com.kh.spring.member.model.service;
+
+public interface MemberService {
+
+	int returnNum();
+	
+	// 메서드를 사용하는 법을 작성(메서드들) -> 기획단계에서
+}

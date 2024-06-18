@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-config.dtd">
+  <configuration>
+  	<settings>
+  		<setting name="jdbcTypeForNull" value="NULL"/>
+  	</settings>
+  	<!-- 주의 할 점! : 별칭 등록을 하기 위해서는 반드시 해당 클래스가 존재해야 함!-->
+  	<typeAliases>
+  			<typeAlias type="" alias=/>
+  	</typeAliases>
+  	
+  </configuration>

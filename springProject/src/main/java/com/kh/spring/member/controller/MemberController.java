@@ -2,8 +2,10 @@ package com.kh.spring.member.controller;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -20,9 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
+//@RequestMapping("/member/")
 public class MemberController {
 	// final : 객체의 불변성을 보장할 수 있음.
 	private final MemberService memberService;
+	private final BCryptPasswordEncoder bcryptPasswordEncoder; // spring-security.xml 빈등록
 	
 	/*
 	@RequestMapping("login.do") // RequestMapping타입의 애노테이션을 붙임으로서 HandlerMapping 등록
@@ -208,12 +212,120 @@ public class MemberController {
 	public ModelAndView login(Member member, ModelAndView mv, HttpSession session) {
 		Member loginUser = memberService.login(member);
 		
-		if(loginUser != null) {
-			session.setAttribute("loginUser", loginUser);
+		//matches()
+		// member => userId필드 : 사용자가 입력한 아이디값
+		//		  => userPwd필드 : 사용자가 입력한 비밀번호 값(평문)
+		
+		//MEMBER테이블에 사용자가 입력한 userId값이 존재하고 STATUS컬럼의 값이 'Y'와 일치한다면
+		
+		//loginUser : 조회된 ResultSet의 컬럼의 값이 필드에 차곡차곡담긴 Member의 객체의 주소값!
+		//			=> userPwd필드 : DB에 기록된 암호화된 비밀번호(암호문)
+		
+		
+		//BCriptPasswordEncoder객체 matches()
+		// matches(평문, 암호문)
+		
+		// 암호문에 포함되어있는 Salt값을 판단해서 평문에 SAlt값을 더해서 암호화를 반복하여 두 값이 같은지 비교!
+		// 일치하면 true / 그렇지않으면 false
+		
+		// if(bcryptPasswordEncoder.matches(member.getUserPwd(), loginUser.getUserPwd()) && loginUser != null) {
+		// => nullpointerException 발생되는 코드. 
+		if(loginUser != null && bcryptPasswordEncoder.matches(member.getUserPwd(), loginUser.getUserPwd())) {
+			session.setAttribute("loginUser", loginUser); // null이 아니고 ~~이어야만 아래코드를 실행. 하나라도 틀리면 실행X.
 			mv.setViewName("redirect:/");
 		} else {
 			mv.addObject("errorMsg", "로그인 실패 ㅠㅜ..").setViewName("common/errorPage");
 		}
 		return mv;
 	}
+	
+	//logout.do를 받아줄 핸들러가 필요.
+	@GetMapping("logout.do")
+	public String logout(HttpSession session) {
+		
+		// sessionScope에 존재하는
+		// loginUser 제거
+		session.removeAttribute("loginUser");
+		// 다른방법. session.invalidate(); -> 세션 초기화. 만약 로그인 말고 다른것도 담겨있으면? 싹다 날라감.
+		
+		
+		return "redirect:/";
+	}
+	
+	
+	
+	@GetMapping("enroll.do")
+	public String enrollForm() {
+	
+		// WEB-INF/views/member/enrollForm.jsp
+		// WEB-INF/views/                 .jsp
+		
+		
+		return "member/enrollForm"; 
+	}
+	
+	@PostMapping("join.do") // 입력폼 사용으로 post
+	public String join(Member member, Model model) {
+		
+		// log.info("회원가입 객체 : {}", member);
+		// 1. 한글 깨짐! => web.xml에 스프링이 제공하는 인코딩 필터 등록!
+		// 2. 비밀번호가 사용자가 입력한 있는 그대로의 평문(plain text -? 비밀번호는 꼭 암호화 해야함.)
+		log.info("평문 : {}", member.getUserPwd());
+		String encPwd = bcryptPasswordEncoder.encode(member.getUserPwd());
+		log.info("암호문 : {}", encPwd );
+
+		member.setUserPwd(encPwd);
+		//Insert할 데이터가 필드에 담긴 Member객체의 userPwd필드에 평문이 아닌 암호문을 담아서 DB로 보내기.
+		
+		// 2. 응답화면 지정
+		String viewName = "";
+		if(memberService.insert(member) > 0) { // 성공 => 메인
+			//return "redirect:/";
+			viewName = "redirect:/";
+		} else { // 실패 => 에러메세지 담아서 에러페이지로 포워딩
+			model.addAttribute("errorMsg", "회원가입 실패");
+			viewName="common/errorPage";
+		}
+		return viewName;
+	}
+	
+	//responseEntity<T>?
+	
+	@GetMapping("mypage.do")
+	public String myPage() {
+		return "member/myPage";
+	}
+	
+	@PostMapping("update.do")
+	public String update(Member member) {
+		
+		log.info("수정요청 멤버 : {}", member);
+		
+		//업데이트 성공이면 1, 아니면 0
+		if(memberService.update(member) > 0) {
+			
+			// 1. 포워딩 => 중복되는요소가 있는경우 만약 jsp이름을 바꾼다면? 저것도 고치고 이거도 고치고 할 일이 두배(유지보수성↑).
+			// return "member/myPage";
+			memberService.
+			return "redirect:mypage.do";
+			// 1. 포워딩 => 중복되는요소가 있는경우 만약 jsp이름을 바꾼다면? 저것도 고치고 이거도 고치고 할 일이 두배(유지보수성↑).
+			// return "member/myPage";
+			// 2. 리다이렉트 => 만들어 놓은것을 다시불러와서 그대로 쓰는것이기 때문에 (로그인시점에서의 session값과 변경된 sql 테이블 값이 일치하지 않게되고,) 결론적으로 갱신되지 않음.
+			// 갱신연관성이 전~혀 없음.
+			// 그럼 redirect는? => DB로부터 수정된 회원정보를 다시 조회해서 sessionScope에 loginUser라는 키값으로 덮어씌워주어야 함.
+		} else {
+			
+		}
+		
+		return null;
+	}
+	// 기획할 때 누가 어떤 매핑값을 쓸지, 메서드이름 등등.. 겹치지 않게
+	
+	//RequestMapiing("/member/")
+	//RequestMapiing("/board/")
+	// => spring/member/update.do
+	// => spring/board/update.do
+	
+	
+	
 }

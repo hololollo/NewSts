@@ -1,0 +1,11 @@
+package com.kh.spring.member.model.repository;
+
+import org.springframework.stereotype.Repository;
+
+
+// Repository : 저장소
+// 영속석 작업 : DB CRUD 작업! => 즉, sql문 실행하고 결과 받아오는 것.
+@Repository
+public class MemberRepository {
+	
+}

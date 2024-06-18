@@ -72,14 +72,14 @@
                              <!-- ${ empty sessionScope.loginUser } null과 빈문자열을 검사한다-->
                              
                       <!-- 로그인 전 -->
-                      <a href="">회원가입</a>
+                      <a href="enroll.do">회원가입</a> <!-- WEB-INF안에서는 직접접근이 불가능. 따라서 forwarding해줘야 함. -->
                       <a data-toggle="modal" data-target="#loginModal">로그인</a> <!-- 모달의 원리 : 이 버튼 클릭시 data-targer에 제시되어있는 해당 아이디의 div요소를 띄워줌 -->
                   </c:when>
                <c:otherwise>
                       <!-- 로그인 후 -->
                       <label>${ sessionScope.loginUser.userName }님 환영합니다</label> &nbsp;&nbsp;
-                      <a href="">마이페이지</a>
-                      <a href="">로그아웃</a>
+                      <a href="mypage.do">마이페이지</a>
+                      <a href="logout.do">로그아웃</a>
                </c:otherwise>                      
             </c:choose>
         </div>

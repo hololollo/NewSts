@@ -30,12 +30,14 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public int insert(Member member) {
-		return 0;
+		// (단순CRUD처리) 1. DAO를 호출, 2. 컨트롤러로 결과 반환, 3. 트랜잭션 처리(둘 이상의 기능)
+			
+		return memberRepository.insert(sqlSession, member);
 	}
 
 	@Override
 	public int update(Member member) {
-		return 0;
+		return memberRepository.update(sqlSession, member);
 	}
 
 	@Override

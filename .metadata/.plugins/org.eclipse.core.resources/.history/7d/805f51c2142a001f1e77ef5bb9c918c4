@@ -1,0 +1,11 @@
+package com.kh.spring.member.model.repository;
+
+import org.springframework.stereotype.Repository;
+
+
+// Repository : 저장소
+// 영속석 작업
+@Repository
+public class MemberRepository {
+	
+}
