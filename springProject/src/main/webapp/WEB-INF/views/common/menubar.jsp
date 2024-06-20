@@ -9,6 +9,17 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- alertify -->
+    <!-- JavaScript -->
+	<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
+	<!-- CSS -->
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
+	<!-- Default theme -->
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+	<!-- Semantic UI theme -->
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/semantic.min.css"/>
+    
     <style>
         div {box-sizing:border-box;} 
         #header {
@@ -58,6 +69,16 @@
     </style>
 </head>
 <body>
+	<!-- 회원정보 수정시 알림창 -->
+	<!-- 포워딩 된 상황에서 sessionScope에 alertMsg가 존재한다면 실행-->
+	<c:if test="${ not empty alertMsg }">
+		<script>
+		
+			alertify.alert('로그인', '${alertMsg}')
+			.set({transition:'zoom'}).show(); 
+		</script>
+		<c:remove var="alertMsg" scope="session" />
+	</c:if>
 
     <div id="header">
         <div id="header_1">
@@ -88,7 +109,7 @@
             <ul>
                 <li><a href="">HOME</a></li>
                 <li><a href="">공지사항</a></li>
-                <li><a href="">자유게시판</a></li>
+                <li><a href="boardlist?page=1">자유게시판</a></li>
                 <li><a href="">사진게시판</a></li>
             </ul>
         </div>

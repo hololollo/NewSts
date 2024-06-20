@@ -232,6 +232,7 @@ public class MemberController {
 		// => nullpointerException 발생되는 코드. 
 		if(loginUser != null && bcryptPasswordEncoder.matches(member.getUserPwd(), loginUser.getUserPwd())) {
 			session.setAttribute("loginUser", loginUser); // null이 아니고 ~~이어야만 아래코드를 실행. 하나라도 틀리면 실행X.
+			session.setAttribute("alertMsg", "로그인 성공!");
 			mv.setViewName("redirect:/");
 		} else {
 			mv.addObject("errorMsg", "로그인 실패 ㅠㅜ..").setViewName("common/errorPage");
@@ -257,15 +258,15 @@ public class MemberController {
 	@GetMapping("enroll.do")
 	public String enrollForm() {
 	
-		// WEB-INF/views/member/enrollForm.jsp
-		// WEB-INF/views/                 .jsp
+		// WEB-INF/views/member/enrollForm.jsp prefix(WEB-INF)
+		// WEB-INF/views/                 .jsp suffix((.jsp)
 		
 		
 		return "member/enrollForm"; 
 	}
 	
 	@PostMapping("join.do") // 입력폼 사용으로 post
-	public String join(Member member, Model model) {
+	public String join(Member member, Model model, HttpSession session) {
 		
 		// log.info("회원가입 객체 : {}", member);
 		// 1. 한글 깨짐! => web.xml에 스프링이 제공하는 인코딩 필터 등록!
@@ -280,10 +281,11 @@ public class MemberController {
 		// 2. 응답화면 지정
 		String viewName = "";
 		if(memberService.insert(member) > 0) { // 성공 => 메인
+			session.setAttribute("alertMsg", "회원가입 성공!");
 			//return "redirect:/";
 			viewName = "redirect:/";
 		} else { // 실패 => 에러메세지 담아서 에러페이지로 포워딩
-			model.addAttribute("errorMsg", "회원가입 실패");
+			session.setAttribute("alertMsg", "회원가입 실패!");
 			viewName="common/errorPage";
 		}
 		return viewName;
@@ -297,7 +299,7 @@ public class MemberController {
 	}
 	
 	@PostMapping("update.do")
-	public String update(Member member) {
+	public String update(Member member, HttpSession session, Model model) {
 		
 		log.info("수정요청 멤버 : {}", member);
 		
@@ -306,18 +308,18 @@ public class MemberController {
 			
 			// 1. 포워딩 => 중복되는요소가 있는경우 만약 jsp이름을 바꾼다면? 저것도 고치고 이거도 고치고 할 일이 두배(유지보수성↑).
 			// return "member/myPage";
-			memberService.
-			return "redirect:mypage.do";
-			// 1. 포워딩 => 중복되는요소가 있는경우 만약 jsp이름을 바꾼다면? 저것도 고치고 이거도 고치고 할 일이 두배(유지보수성↑).
-			// return "member/myPage";
-			// 2. 리다이렉트 => 만들어 놓은것을 다시불러와서 그대로 쓰는것이기 때문에 (로그인시점에서의 session값과 변경된 sql 테이블 값이 일치하지 않게되고,) 결론적으로 갱신되지 않음.
-			// 갱신연관성이 전~혀 없음.
-			// 그럼 redirect는? => DB로부터 수정된 회원정보를 다시 조회해서 sessionScope에 loginUser라는 키값으로 덮어씌워주어야 함.
-		} else {
 			
-		}
-		
-		return null;
+			// DB로부터 수정된 회원정보를 다시 조회해서 sessionScope에 loginUser라는 키값으로 덮어씌워주어야 함.
+			session.setAttribute("loginUser", memberService.login(member));
+			// alert을 띄워 줄 문자열 데이터(회원정보 수정 성공했어요~!)를 어디다 담아주기
+			session.setAttribute("alertMsg", "회원 정보 수정 성공!");
+			// 2. 리다이렉트 => 만들어 놓은것을 다시불러와서 그대로 쓰는것이기 때문에 (로그인시점에서의 session값과 변경된 sql 테이블 값이 일치하지 않게되고,) 결론적으로 갱신되지 않음!
+			return "redirect:mypage.do";
+		} else {
+			model.addAttribute("errorMsg", "정보 수정에 실패했습니다.");
+			return "common/errorPage";
+		}		
+
 	}
 	// 기획할 때 누가 어떤 매핑값을 쓸지, 메서드이름 등등.. 겹치지 않게
 	
@@ -326,6 +328,37 @@ public class MemberController {
 	// => spring/member/update.do
 	// => spring/board/update.do
 	
-	
+	@PostMapping("delete.do")
+	public String delete(Member member, HttpSession session, Model model) {
+		
+		// 아이디/비밀번호 값을 잘 맞게 썻는지 확인.
+		// 매개변수 Member => userPwd : 사용자가 입력한 비밀번호 평문.
+		// session의 loginUser 키값으로 저장되어있는 Member객체의 userPwd필드 : DB에 기록된 암호화된 비밀번호
+		
+		String plainPwd = member.getUserId();
+		String encPwd = ((Member)session.getAttribute("loginUser")).getUserPwd();
+		// 1절 Member의 주소 : session.getAttribute("loginUser")
+		// 2절 : .getUserPwd(); Object타입에 getUserPwd()라는 메서드는 없음. 
+		// => 1절이 Member로 형변환이 되어야 2절인 .getUserPwd();를 받을 수 있음.
+		
+		
+		// 비밀번호가 사용자가 입력한 평문을 이용해서 만든 암호문일 경우
+		if(bcryptPasswordEncoder.matches(plainPwd, encPwd)) {
+			
+			if(memberService.delete(member.getUserId()) > 0) {
+				session.setAttribute("alertMsg", "탈퇴 성공");
+				session.removeAttribute("loginUser");
+				return "redirect:/";
+			} else {
+				model.addAttribute("errorMsg","회원탈퇴에 실패했습니다.");
+				return "common/errorPage";
+			}
+			// memberService.delete(member.getUserId());
+		} else {
+			session.setAttribute("alertMsg", "비밀번호가 일치하지 않습니다.");
+			return "null";
+		}
+		
+	}
 	
 }

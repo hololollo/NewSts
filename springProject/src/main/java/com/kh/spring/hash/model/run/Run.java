@@ -10,7 +10,7 @@ import com.kh.spring.hash.model.vo.Student;
 public class Run {
 	public static void main(String[] args) {
 		
-		//HashSet : 중복허용 X, 순서유지X, 값만 저장
+		//HashSet : (set)중복허용 X, 순서유지X, 값만 저장
 		// Value값만 저장. index가 존재하지 않는다. => 중복허용X, 순서보장x(SET의 특징)
 		
 		//문자열만 담을 수 있는 HashSet
@@ -55,12 +55,12 @@ public class Run {
 		System.out.println(set);
 		//중복저장X, 저장 순서 보장x. => SET의 특징.
 		
-		//그럼 HashSet의 특징은 뭔데? => 중복저장O 
+		//그럼 HashSet의 특징은 뭔데? => 중복저장O (일반set은 중복x)
 		// 요소가 새롭게 추가 될때마다 equals()와 hashCode()로 비교 후
 		// 둘 다 결과가 true일 경우 동일 객체 판단.
 		
 		//equals() : 현재 객체의 주소값을 비교해서 결과를 반환 : boolean
-		//hashcode() : 현재 객체의 주소값을 해싱 알고리즘을 돌려서 10진수로 반환 : int
+		//hashcode() : 현재 객체의 주소값을 해싱 알고리즘을 돌려서 10진수로 반환 : int형!!!
 		
 		
 		

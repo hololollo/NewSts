@@ -76,4 +76,16 @@
 	   	 WHERE
 	   	 		USER_ID = #{userId}
 	</update>
+	
+	
+	<!-- 회원 탈퇴 처리 쿼리문, #{사실상 아무 값이나 상관없음.} -->
+	<update id="delete">
+		UPDATE
+				MEMBER
+		   SET
+		   		STATUS = 'N',
+		   		MODIFY_DATE = SYSDATE
+		 WHERE
+		 		USER__ID = #{userId} 
+	</update>
 </mapper>

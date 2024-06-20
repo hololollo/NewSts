@@ -87,7 +87,8 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
 
-                <form action="" method="post">
+                <form action="delete.do" method="post">
+                <input type="hidden" value="${sessionScope.loginUser.userId }" name="userID" />
                     <!-- Modal body -->
                     <div class="modal-body">
                         <div align="center">
@@ -96,13 +97,33 @@
                         </div>
                         <br>
                             <label for="userPwd" class="mr-sm-2">Password : </label>
-                            <input type="text" class="form-control mb-2 mr-sm-2" placeholder="Enter Password" id="userPwd" name=""> <br>
+                            <input type="text" class="form-control mb-2 mr-sm-2" placeholder="Enter Password" id="userPwd" name="UserPwd"> <br>
                     </div>
                     <!-- Modal footer -->
                     <div class="modal-footer" align="center">
-                        <button type="submit" class="btn btn-danger">탈퇴하기</button>
+                        <button type="button" class="btn btn-danger" onclick="return deletePrompt();">탈퇴하기</button>
                     </div>
                 </form>
+                
+                <script>
+                	// 회원 탈퇴하려면 확인창이 띄워지게
+                	function deletePrompt() {
+                				//prompt의 확인버튼 : 입력한 값을 return(아무것도 입력하지않으면 빈 문자열) / 취소버튼 : null값을 반환
+                	// const value	= prompt('탈퇴를 하고 싶으시면 비밀번호를 다시 한번 입력해주세요.');
+                		// console.log(value);
+                		
+                		// console.log('1' == 1) => true반환. 자바스크립트의 특징:속성과 값으로 이루어져있음. (★타입까지 비교하려면 ===)
+                		// 즉, console.log(typeof('1') === typeof(1)); 이 올바른 방법.
+                		//if(value === '어쩌고저쩌고') {
+                			// submit요청(탈퇴)를 보냄.
+                		//	return true;
+                		//} else {
+                			// submit요청을 안가게 함
+                		//	return false;
+                		//}
+                		return prompt('탈퇴를 하고 싶으시면 비밀번호를 다시 한번 입력해주세요.') === '어쩌고저쩌고' ? true : false;
+                	}	
+                </script>
             </div>
         </div>
     </div>
