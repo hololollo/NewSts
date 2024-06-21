@@ -1,7 +1,9 @@
 package com.kh.spring.board.model.service;
 
 import java.util.List;
+import java.util.Map;
 
+import org.apache.ibatis.session.RowBounds;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Service;
 
@@ -9,36 +11,37 @@ import com.kh.spring.board.model.repository.BoardRepository;
 import com.kh.spring.board.model.vo.Board;
 
 import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService {
-
-	private final BoardRepository boardRepository;
-	private final SqlSessionTemplate sqlSession;
 	
+	private final SqlSessionTemplate sqlSession;
+	private final BoardRepository boardRepository;
+
 	@Override
 	public int boardCount() {
 		return boardRepository.boardCount(sqlSession);
 	}
 
 	@Override
-	public List<Board> findAll() {
-		return boardRepository.findAll(sqlSession);
+	public List<Board> findAll(Map<String,Integer> map) {
+		return boardRepository.findAll(sqlSession, map);
 	}
 
 	@Override
-	public int searchCount() {
-		return 0;
+	public int searchCount(Map<String, String>map) {
+		return boardRepository.searchCount(sqlSession, map);
 	}
 
 	@Override
-	public List<Board> searchAll() {
-		return null;
+	public List<Board> findByConditionAndKeyword(Map<String, String> map, RowBounds rowBounds) {
+		return boardRepository.findByConditionAndKeyword(sqlSession, map, rowBounds);
 	}
 
 	@Override
 	public int insert(Board board) {
-		return 0;
+		return boardRepository.insert(sqlSession, board);
 	}
 
 	@Override
@@ -47,18 +50,18 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
-	public Board findById(int BoardNo) {
+	public Board findById(int boardNo) {
 		return null;
 	}
 
 	@Override
-	public Board delete(int BoardNo) {
-		return null;
+	public int delete(int boardNo) {
+		return 0;
 	}
 
 	@Override
-	public Board update(int BoardNo) {
-		return null;
+	public int update(Board board) {
+		return 0;
 	}
 
 }

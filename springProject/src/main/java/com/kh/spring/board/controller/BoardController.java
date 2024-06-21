@@ -1,11 +1,27 @@
 package com.kh.spring.board.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
+
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.spring.board.model.service.BoardService;
+import com.kh.spring.board.model.vo.Board;
 import com.kh.spring.common.model.vo.PageInfo;
+import com.kh.spring.common.template.PageTemplate;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 public class BoardController {
 	private final BoardService boardService;
 	
+	
+	// localhost/spring/boardlist
 	@GetMapping("boardlist")
-	public String forwarding(@RequestParam(value="page", defaultValue="1") int page) {
+	public String forwarding(@RequestParam(value="page", defaultValue="1") int page, Model model) {
 		
 		// return 전에 요청을 받은 시점에서 DB의 데이터를 가져와서 list로 반환해줌.
 		
@@ -119,6 +137,7 @@ public class BoardController {
 		 *  20 ~ 29 / 10 => 2
 		 *  
 		 *  n = (currentPage -1) / pageLimit;
+		 *  n = 현재페이지(1) / 10 => 0;
 		 */
 		
 		startPage = ((currentPage-1) / (pageLimit * pageLimit)) + 1;
@@ -175,7 +194,169 @@ public class BoardController {
 		 * 끝 값 = 시작값 + boardLimit - 1; 
 		 * 
 		 */
-									
+								
+		
+		Map<String,Integer> map = new HashMap();
+		
+		int startValue = (currentPage - 1) * boardLimit + 1;
+		int endValue = startValue + boardLimit - 1;
+		
+		map.put("startValue", startValue);
+		map.put("endValue", endValue);
+		
+		List<Board> boardList = boardService.findAll(map);
+		
+		log.info("조회된 게시글의 개수 : {}", boardList.size());
+		log.info("--------------");
+		log.info("조회된 게시글 목록 : {}", boardList);
+		
+		model.addAttribute("list", boardList);
+		model.addAttribute("pageInfo", pageInfo);
+		
+		
 		return "board/list";
+	}
+	
+	@GetMapping("search.do")
+	public String search(String condition, @RequestParam(value="page", defaultValue = "1") int page, String keyword, Model model) {
+		
+		log.info(" 검색 조건 : {}", condition);
+		log.info(" 검색 키워드 : {}", keyword);
+		
+		// 사용자가 선택한 조건과 입력한 키워드를 가지고
+		// 페이징 처리를 끝낸 후 검색결과를 들고가야함~!
+		
+		// 검색 경우의 수
+		// 조건 : "writer", "title", "content"
+		// 사용자가 입력한 키워드 뭐가 입력될지 모름. 담아서 간다. 
+		
+		// 클래스나 배열, 맵 가능.
+		Map<String, String> map = new HashMap();
+		map.put("condition", condition);
+		map.put("keyword", keyword);
+		// service로
+		
+		int searchCount = boardService.searchCount(map);
+		log.info("검색 조건에 부합하는 행의 수 : {}", searchCount);
+		int currentPage = page;
+		int pageLimit = 3;
+		int boardLimit = 3;
+		
+		/* PageTemplate클래스에 담아두었음.
+		int maxPage = (int)Math.ceil((double) searchCount / boardLimit);
+		int startPage = (currentPage - 1) / pageLimit * pageLimit + 1;
+		int endPage = startPage + pageLimit - 1;
+		if(endPage > maxPage) {
+			endPage = maxPage;
+		}
+		PageInfo pi = PageInfo.builder().pageLimit(pageLimit)
+										.startPage(startPage)
+										.endPage(endPage)
+										.listCount(endPage)
+										.currentPage(currentPage)
+										.maxPage(maxPage)
+										.boardLimit(boardLimit)
+										.build();
+		
+		*/
+		PageInfo pageInfo = PageTemplate.getPageInfo(searchCount, currentPage, pageLimit, boardLimit);
+		
+		// 마이바티스에서 제공해주는 rowBounds 사용
+		
+		// offset(몇번 건너뛰고 가져갈 것인지 엑셀에서의 offset을 생각x ex. offset 4 => 50개를 조회하고 앞에 40를 제외하고 나머지를 들고간다.)
+		// limit(개수)
+		RowBounds rowBounds = new RowBounds((currentPage - 1) * boardLimit, boardLimit);
+		// Mybatis에서는 페이징 처리를 위해 RowBouns라는 클래스를 제공.
+		
+		/*
+		 * boardLimit이 3일 경우
+		 * 
+		 * currentPage : 1 -> 1~3 ==> 0
+		 * currentPage : 2 -> 4~6 ==> 3개를 건너뛰어야 한다.
+		 * =>
+		 * (currentPage() - 1) * boardLimit()
+		 * 
+		 */
+		
+		List<Board> boardList = boardService.findByConditionAndKeyword(map, rowBounds);
+		
+		model.addAttribute("list", boardList);
+		model.addAttribute("pageInfo", pageInfo);
+		model.addAttribute("keyword", keyword);
+		model.addAttribute("condition", condition);
+		
+		return "board/list";
+	}
+	
+	@GetMapping("boardForm.do")
+	public String boardFormForwarding() {
+		return "board/insertForm";
+	}
+	@PostMapping("insert.do")
+	public String insert(Board board,
+			HttpSession session,
+			Model model,
+			MultipartFile upfile) { // 여러개 첨부시 MultipartFile[] 배열로 선언하면 한번에 들어옴
+					
+		// log.info("게시글정보 : {}", board);
+		// log.info("파일의 정보 : {}", upfile);
+		
+		// 첨부파일 존재o / 존재 x
+		// Multipart객체는 무조건 생성된다!!
+		// => fileName필드에 원본명이 존재하는가 없는가 체크해야함!!
+		
+		// 전달된 파일이 존재할 경우 => 파일 업로드!!
+		
+		if(!upfile.getOriginalFilename().equals("")) {
+			// 파일명이 같으면 안된다. => 덮어씌워짐.
+			// 파일명을 바꿔야 함. ex. kh_년월일시분초_랜덤한값.확장자
+			
+			String originName = upfile.getOriginalFilename();
+			
+			String ext = originName.substring(originName.lastIndexOf("."));
+			// "abc.ddd.txt" => 뒤에 . 기준
+			
+			int num = (int)(Math.random() * 100) + 1; // 값의 범위를 곱한다. 그런뒤에 시작값을 더해준다.
+			// Math.random() : 0.0 ~ 0.9999999....
+			
+			// 시간메서드
+			// log.info("currentTime : {}", new Date());
+			
+			String currentTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+			
+			String savePath = session.getServletContext().getRealPath("/resources/uploadFiles/"); // /가 없으면 파일이 들어가지 않는다.
+			// 새로운 파일 명
+			String changeName = "KH_" + currentTime + "_" + num + ext;
+			
+			try {
+				upfile.transferTo(new File(savePath + changeName)); // 파일경로 + 파일이름
+			} catch (IllegalStateException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			// 첨부파일이 존재하면.
+			// 1. 업로드 완료
+			// 2. Board객체에 originName + changeName에 담아줘야한다.
+			
+			board.setOriginName(originName);
+			board.setChangeName(savePath + changeName);
+		}
+		
+		//첨부파일이 존재하지 않을 경우 board : 제목 / 내용 / 작성자
+		// 첨부파일이 존재할 경우 board : 제목 / 내용 / 작성자 / 원봉명 / 변경된 경로와 이름
+		if(boardService.insert(board) > 0) {
+			session.setAttribute("alertMsg", "게시글 작성 성공~!");
+			return "redirect:/boardlist"; // 무조건 리다이렉트 해야함. 
+		
+		}else {
+			model.addAttribute("errorMsg", "게시글 작성 실패!");
+			return "common/errorPage";
+		}
+		
+		
+		
+		
+		// return "redirect:/boardForm.do";
 	}
 }

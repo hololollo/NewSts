@@ -17,6 +17,7 @@ public class Board {
 	private String boardWriter;
 	private String boardContent;
 	private String originName;
+	private String changeName;
 	private int count;
 	private String createDate;
 	private String status;

@@ -3,6 +3,18 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="boardMapper">
+
+	<!-- 중복되서 작성되는 항목 따로 빼서 selectBoard로 담아줌 -->
+	<sql id="selectBoard">
+		SELECT
+				BOARD_NO boardNo,
+	            BOARD_TITLE boardTitle,
+	            BOARD_CONTENT boardContent,
+	            BOARD_WRITER boardWriter,
+	            CREATE_DATE createDate,
+	            ORIGIN_NAME originName		
+	</sql>
+
 	<select id="boardCount" resultType="_int">   <!-- resultType과 parameterType의 차이점? -->
 		SELECT
 				COUNT(BOARD_NO)
@@ -12,19 +24,15 @@
   		 		STATUS='Y' 
 	</select>
 	
-	<select id="findAll" resultType="board">
-SELECT 
-            BOARD_NO boardNo,
-            BOARD_TITLE boardTitle,
-            BOARD_WRITER boardWriter,
-            COUNT,
-            CREATE_DATE createDate,
-            ORIGIN_NAME originName,
-  FROM
+	<select id="findAll" resultType="board" parameterType="map">
+	
+	<include refid="selectBoard"/>
+  	  FROM
             (SELECT 
                     BOARD_NO,
                     BOARD_TITLE,
                   	BOARD_WRITER,
+                  	BOARD_CONTENT,
                   	COUNT,
                     CREATE_DATE,
                     ORIGIN_NAME,
@@ -34,6 +42,7 @@ SELECT
                              BOARD_NO,
                              BOARD_TITLE,
                              BOARD_WRITER,
+                             BOARD_CONTENT,
                              COUNT,
                              CREATE_DATE,
                              ORIGIN_NAME
@@ -45,6 +54,81 @@ SELECT
                           BY
                              BOARD_NO DESC))               
 WHERE
-      RNUM BETWEEN  AND ; 
+      RNUM BETWEEN #{startValue} AND #{endValue} 
 	</select>
+	
+	<select id="searchCount" parameterType="hashmap" resultType="int">
+		SELECT
+        		COUNT(BOARD_NO)
+		  FROM
+		        BOARD
+		 WHERE
+		        STATUS = 'Y'
+		  <if test="condition == 'writer'">      
+		   AND 
+	            BOARD_WRITER 
+	      </if>
+		  <if test="condition == 'title'">
+		   AND
+		        BOARD_TITLE 
+		  </if>
+		  <if test="condition == 'content'">
+		   AND
+		        BOARD_CONTENT 
+		  </if>
+		        LIKE '%' || #{keyword} || '%'
+	</select>
+	
+	<!-- 검색 결과-->
+	<select id="findByConditionAndKeyword" parameterType="hashmap" resultType="board">
+		SELECT
+				BOARD_NO boardNo,
+	            BOARD_TITLE boardTitle,
+	            BOARD_CONTENT boardContent,
+	            BOARD_WRITER boardWriter,
+	            CREATE_DATE createDate,
+	            ORIGIN_NAME originName
+	      FROM
+	      		BOARD
+	     WHERE
+	     		STATUS = 'Y'
+	   	<choose>
+	   		<when test="condition == 'writer'">
+	   			AND BOARD_WRITER
+	   		</when>
+	   		<when test="condition == 'title'">
+	   			AND BOARD_TITLE
+	   		</when>
+			<otherwise>
+				AND BOARD_CONTENT
+			</otherwise>
+    	</choose>
+     			LIKE '%' || #{keyword} || '%'
+     	 ORDER
+     	    BY
+     			BOARD_NO DESC
+	</select>
+	
+	<insert id="insert" parameterType="board">
+		INSERT
+	      INTO
+	      		BOARD
+	      		(
+	      		BOARD_NO,
+	      		BOARD_TITLE,
+	      		BOARD_CONTENT,
+	      		BOARD_WRITER,
+	      		ORIGIN_NAME,
+	      		CHANGE_NAME
+	      		)
+      	VALUES
+      			(
+      			SEQ_BNO.NEXTVAL,
+      			#{boardTitle},
+      			#{boardContent},
+      			#{boardWriter},
+      			#{originName},
+      			#{changeName}
+      			)
+	</insert>
 </mapper>
