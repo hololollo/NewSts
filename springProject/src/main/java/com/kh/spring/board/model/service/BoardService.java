@@ -24,7 +24,7 @@ public interface BoardService {
 	// 게시글 목록 조회
 	List<Board> findAll(Map<String,Integer> map);
 	
-	// 게시글 검색 기능
+	// 게시글 검색 기능(게시물 개수)
 	int searchCount(Map<String, String> map);
 	
 	// 검색 목록 조회
@@ -32,7 +32,6 @@ public interface BoardService {
 	
 	// 게시글 작성
 	int insert(Board board);
-	
 	
 	//게시글 상세보기(조회수 증가)
 	int increaseCount(int boardNo);

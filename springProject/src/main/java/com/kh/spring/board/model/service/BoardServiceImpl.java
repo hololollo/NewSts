@@ -33,6 +33,7 @@ public class BoardServiceImpl implements BoardService {
 	public int searchCount(Map<String, String>map) {
 		return boardRepository.searchCount(sqlSession, map);
 	}
+	// 숫자 세오기.
 
 	@Override
 	public List<Board> findByConditionAndKeyword(Map<String, String> map, RowBounds rowBounds) {

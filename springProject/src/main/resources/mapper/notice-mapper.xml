@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="noticeMapper">
+
+	<!-- 중복되서 작성되는 항목 따로 빼서 selectBoard로 담아줌 -->
+	<sql id="selectNotice">
+		SELECT
+				NOTICE_NO noticeNo,
+	            NOTICE_TITLE noticeTitle,
+	            NOTICE_CONTENT noticeContent,
+	            NOTICE_WRITER noticeWriter,
+	            CREATE_DATE noticeDate	
+	</sql>
+
+	<select id="noticeCount" resultType="int">   <!-- resultType과 parameterType의 차이점? -->
+		SELECT
+				COUNT(NOTICE_NO)
+		  FROM
+		  		NOTICE
+	</select>
+	
+	<select id="findAll" resultType="notice" parameterType="map">
+	
+	<include refid="selectNotice"/>
+  	  FROM
+            (SELECT 
+                    NOTICE_NO,
+                    NOTICE_TITLE,
+                  	NOTICE_WRITER,
+                  	NOTICE_CONTENT,
+                    CREATE_DATE,
+                    ROWNUM RNUM 
+              FROM
+                   	 (SELECT 
+                             NOTICE_NO,
+                             NOTICE_TITLE,
+                             NOTICE_WRITER,
+                             NOTICE_CONTENT,
+                             CREATE_DATE
+                        FROM
+                             NOTICE                              
+                       ORDER
+                          BY
+                             NOTICE_NO DESC))               
+WHERE
+      RNUM BETWEEN #{startValue} AND #{endValue} 
+	</select>
+	
+	<!-- 검색조건에 부합하는 행의 개수 - 동적 sql(if)-->
+	<select id="searchCount" parameterType="hashmap" resultType="int">
+		SELECT
+        		COUNT(NOTICE_NO)
+		  FROM
+		        NOTICE
+		  <if test="condition == 'writer'">      
+		   AND 
+	            NOTICE_WRITER 
+	      </if>
+		  <if test="condition == 'title'">
+		   AND
+		        NOTICE_TITLE 
+		  </if>
+		  <if test="condition == 'content'">
+		   AND
+		        NOTICE_CONTENT 
+		  </if>
+		        LIKE '%' || #{keyword} || '%'
+	</select>
+	
+	<!-- 검색 결과(Mybatis - 동적 sql(choose-whwen))-->
+	<select id="findByConditionAndKeyword" parameterType="hashmap" resultType="notice">
+	
+	<include refid="selectNotice"/>
+	      FROM
+	      		NOTICE
+	   
+	   	<choose>
+	   		<when test="condition == 'writer'">
+	   			AND NOTICE_WRITER
+	   		</when>
+	   		<when test="condition == 'title'">
+	   			AND NOTICE_TITLE
+	   		</when>
+			<otherwise>
+				AND NOTICE_CONTENT
+			</otherwise>
+    	</choose>
+     			LIKE '%' || #{keyword} || '%'
+     	 ORDER
+     	    BY
+     			NOTICE_NO DESC
+	</select>
+	
+	<insert id="insert" parameterType="notice">
+		INSERT
+	      INTO
+	      		NOTICE
+	      		(
+	      		NOTICE_NO,
+	      		NOTICE_TITLE,
+	      		NOTICE_CONTENT,
+	      		NOTICE_WRITER
+	      		)
+      	VALUES
+      			(
+      			SEQ_NNO.NEXTVAL,
+      			#{noticeTitle},
+      			#{noticeWriter},
+      			#{noticeContent}
+      			)
+	</insert>
+</mapper>

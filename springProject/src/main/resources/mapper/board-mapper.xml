@@ -57,6 +57,7 @@ WHERE
       RNUM BETWEEN #{startValue} AND #{endValue} 
 	</select>
 	
+	<!-- 검색조건에 부합하는 행의 개수 - 동적 sql(if)-->
 	<select id="searchCount" parameterType="hashmap" resultType="int">
 		SELECT
         		COUNT(BOARD_NO)
@@ -79,19 +80,15 @@ WHERE
 		        LIKE '%' || #{keyword} || '%'
 	</select>
 	
-	<!-- 검색 결과-->
+	<!-- 검색 결과(Mybatis - 동적 sql(choose-whwen))-->
 	<select id="findByConditionAndKeyword" parameterType="hashmap" resultType="board">
-		SELECT
-				BOARD_NO boardNo,
-	            BOARD_TITLE boardTitle,
-	            BOARD_CONTENT boardContent,
-	            BOARD_WRITER boardWriter,
-	            CREATE_DATE createDate,
-	            ORIGIN_NAME originName
+	
+	<include refid="selectBoard"/>
 	      FROM
 	      		BOARD
 	     WHERE
 	     		STATUS = 'Y'
+	   
 	   	<choose>
 	   		<when test="condition == 'writer'">
 	   			AND BOARD_WRITER

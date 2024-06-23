@@ -49,7 +49,7 @@
     <div class="content">
         <br><br>
         <div class="innerOuter" style="padding:5% 10%;">
-            <h2>게시판</h2>
+            <h2>공지사항</h2>
             <br>
             <!-- 로그인 후 상태일 경우만 보여지는 글쓰기 버튼 -->
             <c:if test="${not empty sessionScope.loginUser }">
@@ -58,15 +58,13 @@
             <br>
             <br>
      <!-- 글 목록 -->
-            <table id="boardList" class="table table-hover" align="center">
+            <table id="noticeList" class="table table-hover" align="center">
                 <thead>
                     <tr>
                         <th>글번호</th>
                         <th>제목</th>
                         <th>작성자</th>
-                        <th>조회수</th>
                         <th>작성일</th>
-                        <th>첨부파일</th>
                     </tr>
                 </thead>
                  <tbody>
@@ -77,18 +75,19 @@
                 			</tr>
                 		</c:when>
                 		<c:otherwise> <!-- otherwise를 썼기 때문에 else같은 성격 -->
-	                		<c:forEach var="board" items="${list }" varStatus="status">
+	                		<c:forEach var="notice" items="${list }" varStatus="status">
 			                    <tr>
-			                        <td>${board.boardNo }</td>
-			                        <td>${board.boardTitle }</td>
-			                        <td>${board.boardWriter }</td>
-			                        <td>${board.count }</td>
-			                        <td>${board.createDate }</td>
+			                        <td>${notice.noticeNo }</td>
+			                        <td>${notice.noticeTitle }</td>
+			                        <td>${notice.noticeWriter }</td>
+			                        <td>${notice.createDate }</td>
+			                        <!-- 
 			                        <td>
 			                        	<c:if test="${ not empty board.originName }">
 			                        		🖼️
 			                        	</c:if>
 			                        </td>
+			                         -->
 			                    </tr>
 	                    	</c:forEach>
                     	</c:otherwise>
@@ -111,12 +110,12 @@
 				    </c:when>
 				    <c:when test="${ empty condition }">
 				        <li>
-				        	<a class="page-link" href="boardlist?page=${ pageInfo.currentPage - 1 }">이전</a>
+				        	<a class="page-link" href="noticelist?page=${ pageInfo.currentPage - 1 }">이전</a>
 			        	</li>
 				    </c:when>
 				    <c:otherwise>
 				        <li>
-				        	<a class="page-link" href="search.do?page=${ pageInfo.currentPage - 1 }&condition=${condition}&keyword=${keyword }">이전</a>
+				        	<a class="page-link" href="Nsearch.do?page=${ pageInfo.currentPage - 1 }&condition=${condition}&keyword=${keyword }">이전</a>
 			        	</li>
 				    </c:otherwise>
 				</c:choose>
@@ -125,13 +124,13 @@
 	                    <c:choose>
 	                    	<c:when test="${ empty condition }"> 
 		                    	<li class="page-item">
-		                    		<a class="page-link" href="boardlist?page=${ p }">${ p }</a>
+		                    		<a class="page-link" href="noticelist?page=${ p }">${ p }</a>
 		                    		<!-- 몇번 페이지로 요청하는지 -->
 		                    	</li>
 	                    	</c:when>
 	                    	<c:otherwise>
 	                    	 	<li class="page-item">
-		                    		<a class="page-link" href="search.do?page=${ p }&condition=${condition}&keyword=${keyword }">${ p }</a>
+		                    		<a class="page-link" href="Nsearch.do?page=${ p }&condition=${condition}&keyword=${keyword }">${ p }</a>
 		                    	</li>
 	                    	</c:otherwise>
 	                    </c:choose>
@@ -151,7 +150,7 @@
                     </c:when>
                     <c:otherwise>
                     	 <li>
-				        	<a class="page-link" href="search.do?page=${ pageInfo.currentPage + 1 }&condition=${condition}&keyword=${keyword }">다음</a>
+				        	<a class="page-link" href="Nsearch.do?page=${ pageInfo.currentPage + 1 }&condition=${condition}&keyword=${keyword }">다음</a>
 			        	</li>
                     </c:otherwise>
                     </c:choose>
@@ -160,9 +159,10 @@
 
             <br clear="both"><br>
 
-            <form id="searchForm" action="search.do" method="get" align="center">
+            <form id="searchForm" action="Nsearch.do" method="get" align="center">
                 <div class="select">
                     <select class="custom-select" name="condition">
+                    
                         <option value="writer">작성자</option>
                         <option value="title">제목</option>
                         <option value="content">내용</option>

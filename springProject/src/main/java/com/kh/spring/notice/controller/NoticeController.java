@@ -1,4 +1,4 @@
-package com.kh.spring.board.controller;
+package com.kh.spring.notice.controller;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kh.spring.board.model.service.BoardService;
-import com.kh.spring.board.model.vo.Board;
 import com.kh.spring.common.model.vo.PageInfo;
 import com.kh.spring.common.template.PageTemplate;
+import com.kh.spring.notice.model.service.NoticeService;
+import com.kh.spring.notice.model.vo.Notice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-public class BoardController {
-	private final BoardService boardService;
+
+public class NoticeController {
+	
+private final NoticeService noticeService;
 	
 	
 	// localhost/spring/boardlist
-	@GetMapping("boardlist")
+	@GetMapping("noticelist")
 	public String forwarding(@RequestParam(value="page", defaultValue="1") int page, Model model) {
 		
 		// return 전에 요청을 받은 시점에서 DB의 데이터를 가져와서 list로 반환해줌.
@@ -55,7 +57,7 @@ public class BoardController {
 		int endPage; // 그 화면상 하단에 보여질 페이징바의 끝나는 페이지넘버
 		
 		// * listCount : 총 게시글의 수
-		listCount = boardService.boardCount();
+		listCount = noticeService.noticeCount();
 		
 		
 		// *currentPage : 현재 페이지(사용자가 요청한 페이지)
@@ -68,95 +70,13 @@ public class BoardController {
 		// * boardLimit : 한 페이지에 보여질 게시글의 최대 개수
 		boardLimit = 10;
 		
-		// * maxPage : 가장 마지막 페이지가 몇 번 페이지인지(총 페이지 개수)
-		/*
-		 * listCount, boardLimit에 영향을 받음.
-		 * 
-		 * -공식 구하기
-		 *  단, boardLimit이 10이라는 가정.
-		 *  
-		 *  총 개수(listCount)    게시글 개수(boardLimit)      maxPage(마지막페이지)
-		 *  100         /        10                  ==    10.0 -> 10페이지
-		 *  106         /        10                  ==    10.6 -> 11페이지
-		 *  111         /        10                  ==    11.1 -> 12페이지
-		 * 
-		 *   -> 나눗셈 결과에 소숫점을 붙여서 올림처리 할 경우 maxPage가 됨!!
-		 *   
-		 *   코드를 작성하는 순서를 풀어보자면
-		 *   1. listCount를 double로 변환
-		 *   2. listCount / boardLimit
-		 *   3. Math.ceil() => 결과를 올림처리
-		 *   4. 결가값을 int로 형변환
-		 */
-		
 		maxPage = (int)Math.ceil((double)listCount / boardLimit);
 		
-		
-		// Math math = new Math(); 
-		
-		
-		// * startPage : 페이지 하단에 보여질 페이징바의 시작 수
-		/*
-		 * 
-		 * 
-		 * currentPage, pageLimit에 영향을 받음
-		 * 
-		 * - 공식
-		 *     단, pageLimit이 10이라고 가정
-		 *     
-		 * - startPage : 1, 11, 212, 31 ,41 => n * 10 + 1
-		 * 
-		 * 
-		 * 만약 pageLimit이 5다!
-		 *  - startPage : 1, 6, 11, 16, 21 => n * 5 + 1
-		 *  
-		 *  즉, startPAge = n * pageLimit + 1
-		 *  
-		 *  currentPage    startPage
-		 *  	1				1
-		 *  	5				1
-		 *  	9				1
-		 *  	10				1
-		 *  	13				11
-		 *  	15				11	
-		 *  	21				21
-		 *  
-		 *  => 1 ~ 10 : n * 10 + 1 ==> n == 0
-		 *  => 11 ~ 20 : n * 10 + 1 ==> n == 1
-		 *  => 21 ~ 30 : n * 10 + 1 ==> n == 2
-		 *  
-		 *  -----
-		 *  
-		 *  1 ~ 10 / 10 => 0 ~ 1
-		 *  11 ~ 20 / 10 => 1 ~ 2
-		 *  21 ~ 30 / 10 => 2 ~ 3
-		 *  
-		 *  
-		 *  1 ~ 9 / 10 => 0
-		 *  10 ~ 19 / 10 => 1
-		 *  20 ~ 29 / 10 => 2
-		 *  
-		 *  n = (currentPage -1) / pageLimit;
-		 *  n = 현재페이지(1) / 10 => 0;
-		 */
-		
+
 		startPage = ((currentPage-1) / (pageLimit * pageLimit)) + 1;
 		
 		// *endPage : 페이지 하단에 보여질 페이징바의 끝 수
 		
-		/*
-		 * startPage, pageLimit에 영향을 받음(단, maxPage도 마지막 페이징바에 대해 영향을 끼침ex. 10개씩인데 5밖엔 안남은 상황 등)
-		 * 
-		 * -공식
-		 * 단, pageLimit이 10이라고 가정
-		 * 
-		 * startPage : 1 => endPage : 10
-		 * startPage : 11 => endPage : 20
-		 * startPage : 21 => endPage : 30
-		 * 
-		 * => endPage = startPage + pageLimit - 1;
-		 *
-		 */
 		
 		endPage = startPage + pageLimit - 1;
 		// startPage가 1이라서 endPage가 10이 들어갔는데 maxPage가 2인경우
@@ -195,7 +115,7 @@ public class BoardController {
 		 * 
 		 */
 								
-		
+		// 전체 목록조회
 		Map<String,Integer> map = new HashMap();
 		
 		int startValue = (currentPage - 1) * boardLimit + 1;
@@ -204,20 +124,20 @@ public class BoardController {
 		map.put("startValue", startValue);
 		map.put("endValue", endValue);
 		
-		List<Board> boardList = boardService.findAll(map);
+		List<Notice> noticeList = noticeService.findAll(map);
 		
-		log.info("조회된 게시글의 개수 : {}", boardList.size());
+		log.info("조회된 게시글의 개수 : {}", noticeList.size());
 		log.info("--------------");
-		log.info("조회된 게시글 목록 : {}", boardList);
+		log.info("조회된 게시글 목록 : {}", noticeList);
 		
-		model.addAttribute("list", boardList);
+		model.addAttribute("list", noticeList);
 		model.addAttribute("pageInfo", pageInfo);
 		
 		
-		return "board/list";
+		return "notice/list";
 	}
 	
-	@GetMapping("search.do")
+	@GetMapping("Nsearch.do")
 	public String search(String condition, @RequestParam(value="page", defaultValue = "1") int page, String keyword, Model model) {
 		
 		log.info(" 검색 조건 : {}", condition);
@@ -236,7 +156,7 @@ public class BoardController {
 		map.put("keyword", keyword);
 		// service로
 		
-		int searchCount = boardService.searchCount(map);
+		int searchCount = noticeService.searchCount(map);
 		log.info("검색 조건에 부합하는 행의 수 : {}", searchCount);
 		int currentPage = page;
 		int pageLimit = 5;
@@ -277,22 +197,22 @@ public class BoardController {
 		 * 
 		 */
 		
-		List<Board> boardList = boardService.findByConditionAndKeyword(map, rowBounds);
+		List<Notice> noticeList = noticeService.findByConditionAndKeyword(map, rowBounds);
 		
-		model.addAttribute("list", boardList);
+		model.addAttribute("list", noticeList);
 		model.addAttribute("pageInfo", pageInfo);
 		model.addAttribute("keyword", keyword);
 		model.addAttribute("condition", condition);
 		
-		return "board/list";
+		return "notice/list";
 	}
-	
-	@GetMapping("boardForm.do")
-	public String boardFormForwarding() {
-		return "board/insertForm";
+	/*
+	@GetMapping("noticeForm.do")
+	public String noticeFormForwarding() {
+		return "notice/insertForm";
 	}
 	@PostMapping("insert.do")
-	public String insert(Board board,
+	public String insert(Notice notice,
 			HttpSession session,
 			Model model,
 			MultipartFile upfile) { // 여러개 첨부시 MultipartFile[] 배열로 선언하면 한번에 들어옴
@@ -305,6 +225,7 @@ public class BoardController {
 		// => fileName필드에 원본명이 존재하는가 없는가 체크해야함!!
 		
 		// 전달된 파일이 존재할 경우 => 파일 업로드!!
+		
 		
 		if(!upfile.getOriginalFilename().equals("")) {
 			// 파일명이 같으면 안된다. => 덮어씌워짐.
@@ -338,24 +259,24 @@ public class BoardController {
 			// 1. 업로드 완료
 			// 2. Board객체에 originName + changeName에 담아줘야한다.
 			
-			board.setOriginName(originName);
-			board.setChangeName(savePath + changeName);
+			notice.setOriginName(originName);
+			notice.setChangeName(savePath + changeName);
 		}
+		
 		
 		//첨부파일이 존재하지 않을 경우 board : 제목 / 내용 / 작성자
 		// 첨부파일이 존재할 경우 board : 제목 / 내용 / 작성자 / 원봉명 / 변경된 경로와 이름
-		if(boardService.insert(board) > 0) {
+		if(noticeService.insert(notice) > 0) {
 			session.setAttribute("alertMsg", "게시글 작성 성공~!");
-			return "redirect:/boardlist"; // 무조건 리다이렉트 해야함. 
+			return "redirect:/noticelist"; // 무조건 리다이렉트 해야함. 
 		
 		}else {
 			model.addAttribute("errorMsg", "게시글 작성 실패!");
 			return "common/errorPage";
 		}
+		*/
 		
 		
 		
-		
-		// return "redirect:/boardForm.do";
+		// return "redirect:/noticeForm.do";
 	}
-}
