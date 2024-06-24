@@ -40,13 +40,7 @@ private final NoticeService noticeService;
 	public String forwarding(@RequestParam(value="page", defaultValue="1") int page, Model model) {
 		
 		// return 전에 요청을 받은 시점에서 DB의 데이터를 가져와서 list로 반환해줌.
-		
-		// -- 페이징 처리 -- 2가지 방법. 둘의 성능이 다르다.
-		// RowBounds 안쓴거
-		// RowBounds 쓴거
-		
-		// 필요한 변수들(7)
-		// 최대한 풀어서 작성.
+
 		int listCount; // 현재 일반 게시판의 게시글 총 개수 => BOARD테이블로부터 SELECT COUNT(*)활용해서 조회
 		int currentPage; // 현재페이지(사용자가 요청한 페이지) => 앞에서 넘길것.
 		int pageLimit; // 페이지 하단에 보여질 페이징바의 최대 개수 => 10개로 고정 
@@ -115,6 +109,10 @@ private final NoticeService noticeService;
 		 * 
 		 */
 								
+		
+		
+		
+		
 		// 전체 목록조회
 		Map<String,Integer> map = new HashMap();
 		
@@ -126,24 +124,23 @@ private final NoticeService noticeService;
 		
 		List<Notice> noticeList = noticeService.findAll(map);
 		
-		log.info("조회된 게시글의 개수 : {}", noticeList.size());
-		log.info("--------------");
-		log.info("조회된 게시글 목록 : {}", noticeList);
+		//log.info("조회된 게시글의 개수 : {}", noticeList.size());
+		//log.info("--------------");
+		//log.info("조회된 게시글 목록 : {}", noticeList);
 		
 		model.addAttribute("list", noticeList);
 		model.addAttribute("pageInfo", pageInfo);
-		
-		
+
 		return "notice/list";
 	}
 	
+	//검색기능
 	@GetMapping("Nsearch.do")
 	public String search(String condition, @RequestParam(value="page", defaultValue = "1") int page, String keyword, Model model) {
 		
-		log.info(" 검색 조건 : {}", condition);
-		log.info(" 검색 키워드 : {}", keyword);
+		// log.info(" 검색 조건 : {}", condition);
+		// log.info(" 검색 키워드 : {}", keyword);
 		
-		// 사용자가 선택한 조건과 입력한 키워드를 가지고
 		// 페이징 처리를 끝낸 후 검색결과를 들고가야함~!
 		
 		// 검색 경우의 수
@@ -162,23 +159,6 @@ private final NoticeService noticeService;
 		int pageLimit = 5;
 		int boardLimit = 5;
 		
-		/* PageTemplate클래스에 담아두었음.
-		int maxPage = (int)Math.ceil((double) searchCount / boardLimit);
-		int startPage = (currentPage - 1) / pageLimit * pageLimit + 1;
-		int endPage = startPage + pageLimit - 1;
-		if(endPage > maxPage) {
-			endPage = maxPage;
-		}
-		PageInfo pi = PageInfo.builder().pageLimit(pageLimit)
-										.startPage(startPage)
-										.endPage(endPage)
-										.listCount(listCount)
-										.currentPage(currentPage)
-										.maxPage(maxPage)
-										.boardLimit(boardLimit)
-										.build();
-		
-		*/
 		//pageTemplate클래스에서 가져와서(get) pageInfo에 담아줌
 		PageInfo pageInfo = PageTemplate.getPageInfo(searchCount, currentPage, pageLimit, boardLimit);
 		
@@ -187,15 +167,6 @@ private final NoticeService noticeService;
 		// offset(몇번 건너뛰고 가져갈 것인지 엑셀에서의 offset을 생각x ex. offset 4 => 50개를 조회하고 앞에 40를 제외하고 나머지를 들고간다.)
 		// limit(개수)
 		RowBounds rowBounds = new RowBounds((currentPage - 1) * boardLimit, boardLimit);
-		/*
-		 * boardLimit이 3일 경우
-		 * 
-		 * currentPage : 1 -> 1~3 ==> offset은 0
-		 * currentPage : 2 -> 4~6 ==> offset은 3(개를 건너뛰어야 한다.)
-		 * =>
-		 * (currentPage() - 1) * boardLimit()
-		 * 
-		 */
 		
 		List<Notice> noticeList = noticeService.findByConditionAndKeyword(map, rowBounds);
 		
@@ -206,66 +177,21 @@ private final NoticeService noticeService;
 		
 		return "notice/list";
 	}
-	/*
+	
+	//글등록 넘어가기
 	@GetMapping("noticeForm.do")
 	public String noticeFormForwarding() {
 		return "notice/insertForm";
 	}
-	@PostMapping("insert.do")
+	//글등록
+	@PostMapping("Ninsert.do")
 	public String insert(Notice notice,
 			HttpSession session,
-			Model model,
-			MultipartFile upfile) { // 여러개 첨부시 MultipartFile[] 배열로 선언하면 한번에 들어옴
-					
-		// log.info("게시글정보 : {}", board);
-		// log.info("파일의 정보 : {}", upfile);
-		
-		// 첨부파일 존재o / 존재 x
-		// Multipart객체는 무조건 생성된다!!
-		// => fileName필드에 원본명이 존재하는가 없는가 체크해야함!!
-		
-		// 전달된 파일이 존재할 경우 => 파일 업로드!!
-		
-		
-		if(!upfile.getOriginalFilename().equals("")) {
-			// 파일명이 같으면 안된다. => 덮어씌워짐.
-			// 파일명을 바꿔야 함. ex. kh_년월일시분초_랜덤한값.확장자
-			
-			String originName = upfile.getOriginalFilename();
-			
-			String ext = originName.substring(originName.lastIndexOf("."));
-			// "abc.ddd.txt" => 뒤에 . 기준
-			
-			int num = (int)(Math.random() * 100) + 1; // 값의 범위를 곱한다. 그런뒤에 시작값을 더해준다.
-			// Math.random() : 0.0 ~ 0.9999999....
-			
-			// 시간메서드
-			// log.info("currentTime : {}", new Date());
-			
-			String currentTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-			
-			String savePath = session.getServletContext().getRealPath("/resources/uploadFiles/"); // /가 없으면 파일이 들어가지 않는다.
-			// 새로운 파일 명
-			String changeName = "KH_" + currentTime + "_" + num + ext;
-			
-			try {
-				upfile.transferTo(new File(savePath + changeName)); // 파일경로 + 파일이름
-			} catch (IllegalStateException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			// 첨부파일이 존재하면.
-			// 1. 업로드 완료
-			// 2. Board객체에 originName + changeName에 담아줘야한다.
-			
-			notice.setOriginName(originName);
-			notice.setChangeName(savePath + changeName);
-		}
-		
-		
-		//첨부파일이 존재하지 않을 경우 board : 제목 / 내용 / 작성자
-		// 첨부파일이 존재할 경우 board : 제목 / 내용 / 작성자 / 원봉명 / 변경된 경로와 이름
+			Model model) { 
+		noticeService.insert(notice);
+		return "redirect:/noticelist";
+	}
+	/*
 		if(noticeService.insert(notice) > 0) {
 			session.setAttribute("alertMsg", "게시글 작성 성공~!");
 			return "redirect:/noticelist"; // 무조건 리다이렉트 해야함. 
@@ -277,6 +203,5 @@ private final NoticeService noticeService;
 		*/
 		
 		
-		
-		// return "redirect:/noticeForm.do";
-	}
+		 
+}

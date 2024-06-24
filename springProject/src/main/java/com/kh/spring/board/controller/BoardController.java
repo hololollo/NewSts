@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.kh.spring.board.model.service.BoardService;
 import com.kh.spring.board.model.vo.Board;
@@ -309,7 +310,7 @@ public class BoardController {
 		if(!upfile.getOriginalFilename().equals("")) {
 			// 파일명이 같으면 안된다. => 덮어씌워짐.
 			// 파일명을 바꿔야 함. ex. kh_년월일시분초_랜덤한값.확장자
-			
+			/*
 			String originName = upfile.getOriginalFilename();
 			
 			String ext = originName.substring(originName.lastIndexOf("."));
@@ -334,12 +335,14 @@ public class BoardController {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			*/
+			saveFile(upfile, session); // 460행 메서드로 따로 빼놓음
 			// 첨부파일이 존재하면.
 			// 1. 업로드 완료
 			// 2. Board객체에 originName + changeName에 담아줘야한다.
 			
-			board.setOriginName(originName);
-			board.setChangeName(savePath + changeName);
+			board.setOriginName(upfile.getOriginalFilename());
+			board.setChangeName(saveFile(upfile, session)); // 480행쪽에 메서드를 만들어 놨음.
 		}
 		
 		//첨부파일이 존재하지 않을 경우 board : 제목 / 내용 / 작성자
@@ -353,9 +356,134 @@ public class BoardController {
 			return "common/errorPage";
 		}
 		
+	}
+	
+	// localhost/spring/board-detail?boardNo(key)=???(value)
+	@GetMapping("board-detail")
+	public ModelAndView findById(int boardNo, ModelAndView mv) {
+		// public ModelAndView findByBoardNo(HttpServletRequest request, @RequestParam(value="boardNo") int boardNo) {
+		// 리퀘스트서블릿 - 디스패처서블릿에 담아서 보내줌. 리퀘스트파람이란? HTTP 요청 파라미터를 컨트롤러 메서드의 파라미터에 바인딩하는 데 사용됩니다. 주로 GET 요청의 쿼리 스트링이나 POST 요청의 폼 데이터에서 값을 추출할 때 사용됩니다.
+		// int abc = Integer.parseInt("123"); // '파싱한다'라고 표현함. 형변환과는 다른개념임. 기본형->참조형(o). 참조형->기본형(x)
+		
+		// 1. 데이터 가공 --> 매개변수(파라미터) 한개라서 할거 없음
+		// 2. 서비스호출
+		if(boardService.increaseCount(boardNo) > 0) {
+		mv.addObject("board", boardService.findById(boardNo)).setViewName("board/boardDetail");	
+		
+		} else {
+			mv.addObject("errorMsg", "게시글 상세조회에 실패했습니다.").setViewName("common/errorPage");
+			
+		}
+		//get방식이기때문에 DML(CRUD)이 성공할 수도 있고 실패할 수도 있음. 카운트가 증가되면 상제조회가 되도록.
 		
 		
+		// 실패여부 확인
 		
-		// return "redirect:/boardForm.do";
+		// 3. 응답화면 지정
+		
+		return mv;
+	}
+	
+	/*
+	 * deleteById : Client(게시글 작성자)에게 정수형의 boardNo(BOARD테이블의 pk)를 전달받아서 BOARD테이블의 존재하는 STATUS컬럼의 값을 'N'으로 갱신.
+	 * 
+	 * @param boardNo : 각 행을 식별하기 위한 PK
+	 * @param filePath : 요청 처리 성공 시 첨부파일을 제거하기 위해 파일이 저장되어 있는 경로 및 파일명
+	 * 
+	 * @return : 반환된 View의 논리적인 경로
+	 *
+	 * 생각해보니 게시글에 파일이 달릴 수 있네?
+	 * 
+	 * 근데 처음에 생각안하고 작업했다가 다시 view단 가서 파일정보를 끌어왔습니다.
+	 * 
+	 * 해봤더니 뭐시기 Exception이 생겼다. 그래서 찾아보니까 어떤거란다.
+	 * 
+	 * 요롷케 조롷케 해결했다.
+	 */
+	
+	@PostMapping("boardDelete.do")
+	public String deleteById(int boardNo, String filePath, HttpSession session, Model model) {
+		if(boardService.delete(boardNo) > 0) {
+			if(!"".equals(filePath)) { // 파일이 저장되어 있는 경로 및 파일명이 빈문자열이 아닌 
+		// 만약 요청하는 view에서 filePath 오타가 발생했다면, null값이 발생하여 nullpointerException이 발생할 수도 있으니 주어를 변경해서 막아준다.
+			new File(session.getServletContext().getRealPath(filePath)).delete();
+			}
+			session.setAttribute("alertMsg", "게시글 삭제 성공");
+			return "redirect:boardlist";
+		}else {
+			model.addAttribute("errorMsg", "게시글 삭제 실패");
+			return "common/errorPage";
+		}
+
+	}
+	
+	// 수정하기
+	@PostMapping("boardUpdateForm.do")
+	public ModelAndView updateForm(ModelAndView mv, int boardNo) {
+		mv.addObject("board", boardService.findById(boardNo)).setViewName("board/boardUpdate");
+		// boardNo을 가져오는 findById 를 재활용
+		return mv;
+	}
+	
+	@PostMapping("board-update.do")
+	public String update(Board board, HttpSession session, MultipartFile reUpFile) {
+		// DB가서 BOARD테이블 UPDATE
+		
+		//Board board
+		
+		/*
+		 * -> boardTitle, boardContent
+		 * + reUpfile
+		 * 
+		 * 1. 기존 첨부파일X, 새로운 첨부파일x => 그렇구나~ 더 할게 없음.
+		 * 2. 기존 첨부파일O, 새로운 첨부파일x => ORIGIN : 기존 첨부파일 이름, CHANGE : 기존 첨부파일 경로 (기존 파일이 날라갈 수 있음.)
+		 * 3. 기존 첨부파일X, 새로운 첨부파일O => ORIGIN : 새로운 첨부파일 이름, CHANGE : 새로운 첨부파일 경로
+		 * 4. 기존 첨부파일O, 새로운 첨부파일O => ORIGIN : 새로운 첨부파일 이름, CHANGE : 새로운 첨부파일 경로 
+		 * 
+		 */
+		// 새로운 첨부파일이 존재하는가? 를 체크해야한다.
+		if(!reUpFile.getOriginalFilename().equals("")) { // 빈문자열과 같지 않으면 (새로운 첨부파일이 있다.)
+			board.setOriginName(reUpFile.getOriginalFilename()); // board에 담는다.
+			board.setChangeName(saveFile(reUpFile, session));
+		}
+		// 담은 값을 board까지 전달~
+		if(boardService.update(board)>0) {
+			session.setAttribute("alertMsg", "수정완료");
+			return "redirect:board-detail?boardNo=" + board.getBoardNo();
+		}else {
+			session.setAttribute("errorMsg", "정보수정 실패");
+			return "common/errorPage";
+		}
+		
+		
+	}
+	public String saveFile(MultipartFile upfile, HttpSession session) {
+		
+		String originName = upfile.getOriginalFilename();
+		
+		String ext = originName.substring(originName.lastIndexOf("."));
+		// "abc.ddd.txt" => 뒤에 . 기준
+		
+		int num = (int)(Math.random() * 100) + 1; // 값의 범위를 곱한다. 그런뒤에 시작값을 더해준다.
+		// Math.random() : 0.0 ~ 0.9999999....
+		
+		// 시간메서드
+		// log.info("currentTime : {}", new Date());
+		
+		String currentTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+		
+		String savePath = session.getServletContext().getRealPath("/resources/uploadFiles/"); // /가 없으면 파일이 들어가지 않는다.
+		// 새로운 파일 명
+		String changeName = "KH_" + currentTime + "_" + num + ext;
+		
+		try {
+			upfile.transferTo(new File(savePath + changeName)); // 파일경로 + 파일이름
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return "resources/uploadFiles/" + changeName;
 	}
 }

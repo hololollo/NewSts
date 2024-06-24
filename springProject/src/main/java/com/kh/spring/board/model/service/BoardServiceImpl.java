@@ -47,22 +47,22 @@ public class BoardServiceImpl implements BoardService {
 
 	@Override
 	public int increaseCount(int boardNo) {
-		return 0;
+		return boardRepository.increaseCount(sqlSession, boardNo);
 	}
-
+	// 조회수증가가 성공한다면 상세보기를 할 수 있게
 	@Override
 	public Board findById(int boardNo) {
-		return null;
+		return boardRepository.findById(sqlSession, boardNo);
 	}
 
 	@Override
 	public int delete(int boardNo) {
-		return 0;
+		return boardRepository.delete(sqlSession, boardNo);
 	}
 
 	@Override
 	public int update(Board board) {
-		return 0;
+		return boardRepository.update(sqlSession, board);
 	}
 
 }

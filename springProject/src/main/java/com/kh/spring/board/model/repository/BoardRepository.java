@@ -37,5 +37,21 @@ public class BoardRepository {
 	public int insert(SqlSessionTemplate sqlSession, Board board) {
 		return sqlSession.insert("boardMapper.insert", board);
 	}
+
+	public int increaseCount(SqlSessionTemplate sqlSession, int boardNo) {
+		return sqlSession.update("boardMapper.increaseCount", boardNo);
+	}
+
+	public Board findById(SqlSessionTemplate sqlSession, int boardNo) {
+		return sqlSession.selectOne("boardMapper.findById", boardNo); // 하나(selectOne)의 게시글 정보만 가져옴.
+	}
+
+	public int delete(SqlSessionTemplate sqlSession, int boardNo) {
+		return sqlSession.update("boardMapper.delete", boardNo);
+	}
+
+	public int update(SqlSessionTemplate sqlSession, Board board) {
+		return sqlSession.update("boardMapper.update", board);
+	}
 		
 }

@@ -43,7 +43,7 @@ public class NoticeServiceImpl implements NoticeService{
 	
 	@Override
 	public int insert(Notice notice) {
-		return 0;
+		return noticeRepository.insert(sqlSession, notice);
 	}
 	
 }

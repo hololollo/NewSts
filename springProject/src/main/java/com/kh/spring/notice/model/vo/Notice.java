@@ -15,4 +15,6 @@ public class Notice {
 	private String noticeWriter;
 	private String noticeContent;
 	private String createDate;
+	
+	//board와 차이점 : 조회수(count), 파일업로드용 오리진네임 없음
 }

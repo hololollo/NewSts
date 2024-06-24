@@ -29,7 +29,11 @@ public class NoticeRepository {
 		return sqlSession.selectList("noticeMapper.findByConditionAndKeyword", map, rowBounds);
 	}
 
+	public int insert(SqlSessionTemplate sqlSession, Notice notice) {
+		return sqlSession.insert("noticeMapper.insert", notice);
+	}
 
+	
 	
 	
 	
