@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.kh.spring.member.model.service.MemberService;
@@ -359,6 +360,25 @@ public class MemberController {
 			return "null";
 		}
 		
+	}
+	@ResponseBody
+	@GetMapping("idCheck.do")
+	public String checkId(String checkId) {
+		// log.info(checkId);
+		
+		//int result = memberService.idCheck(checkId); // SQL문 어떻게 쓸껀지 미리 정해놔야 함.
+		// 1(NNNNY)이면 중복이 존재하고 0(NNNNN)이면 중복이 존재하지 않는다.
+		
+		/*
+		if(result > 0) { // 이미 존재하는 아이디
+			return "NNNNN";
+		}else {
+			return "NNNNY";
+		} =>
+		*/
+		//return result > 0 ? "NNNNN" : "NNNNY"; 
+		// =>
+		return memberService.idCheck(checkId) > 0 ? "NNNNN" : "NNNNY";
 	}
 	
 }

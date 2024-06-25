@@ -88,4 +88,14 @@
 		 WHERE
 		 		USER__ID = #{userId} 
 	</update>
+	
+	<!-- 아이디 중복체크용 쿼리문 -->
+	<select id="idCheck" parameterType="String" resultType="_int">
+		SELECT
+				COUNT(*)
+		  FROM
+		  		MEMBER
+		 WHERE
+		 		USER_ID = #{checkId}
+	</select>
 </mapper>

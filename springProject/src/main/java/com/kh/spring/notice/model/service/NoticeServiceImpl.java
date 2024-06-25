@@ -7,8 +7,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Service;
 
-import com.kh.spring.board.model.repository.BoardRepository;
-import com.kh.spring.board.model.service.BoardService;
+import com.kh.spring.board.model.vo.Board;
 import com.kh.spring.notice.model.repository.NoticeRepository;
 import com.kh.spring.notice.model.vo.Notice;
 
@@ -45,5 +44,24 @@ public class NoticeServiceImpl implements NoticeService{
 	public int insert(Notice notice) {
 		return noticeRepository.insert(sqlSession, notice);
 	}
+
+	//상세보기
+	@Override
+	public Notice noticeFindById(int noticeNo) {
+		return noticeRepository.noticeFindById(sqlSession, noticeNo);
+	}
+	//게시글 삭제
+	@Override
+	public int noticeDeleteById(int noticeNo) {
+		return noticeRepository.noticeDeleteById(sqlSession, noticeNo);
+	}
+
+	@Override
+	public int noticeUpdate(Notice notice) {
+		return noticeRepository.noticeUpdate(sqlSession, notice);
+	}
+	
+	
+	
 	
 }

@@ -4,14 +4,14 @@
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="noticeMapper">
 
-	<!-- 중복되서 작성되는 항목 따로 빼서 selectBoard로 담아줌 -->
+	<!-- 중복되서 작성되는 항목 따로 빼서 selectNotice로 담아줌 -->
 	<sql id="selectNotice">
 		SELECT
 				NOTICE_NO noticeNo,
 	            NOTICE_TITLE noticeTitle,
 	            NOTICE_CONTENT noticeContent,
 	            NOTICE_WRITER noticeWriter,
-	            CREATE_DATE noticeDate	
+	            CREATE_DATE createDate	
 	</sql>
 
 	<select id="noticeCount" resultType="int">   <!-- resultType과 parameterType의 차이점? -->
@@ -54,19 +54,17 @@ WHERE
         		COUNT(NOTICE_NO)
 		  FROM
 		        NOTICE
+		  <where>      
 		  <if test="condition == 'writer'">      
-		   AND 
-	            NOTICE_WRITER 
+	            NOTICE_WRITER LIKE '%' || #{keyword} || '%'
 	      </if>
 		  <if test="condition == 'title'">
-		   AND
-		        NOTICE_TITLE 
+		        NOTICE_TITLE LIKE '%' || #{keyword} || '%'
 		  </if>
 		  <if test="condition == 'content'">
-		   AND
-		        NOTICE_CONTENT 
+		        NOTICE_CONTENT LIKE '%' || #{keyword} || '%'
 		  </if>
-		        LIKE '%' || #{keyword} || '%'
+		  </where>
 	</select>
 	
 	<!-- 검색 결과(Mybatis - 동적 sql(choose-whwen))-->
@@ -75,19 +73,19 @@ WHERE
 	<include refid="selectNotice"/>
 	      FROM
 	      		NOTICE
-	   
+	    <where>  		
 	   	<choose>
 	   		<when test="condition == 'writer'">
-	   			AND NOTICE_WRITER
+	   			NOTICE_WRITER LIKE '%' || #{keyword} || '%'
 	   		</when>
 	   		<when test="condition == 'title'">
-	   			AND NOTICE_TITLE
+	   			NOTICE_TITLE LIKE '%' || #{keyword} || '%'
 	   		</when>
 			<otherwise>
-				AND NOTICE_CONTENT
+				NOTICE_CONTENT LIKE '%' || #{keyword} || '%'
 			</otherwise>
     	</choose>
-     			LIKE '%' || #{keyword} || '%'
+    	</where>
      	 ORDER
      	    BY
      			NOTICE_NO DESC
@@ -100,8 +98,8 @@ WHERE
 	      		(
 	      		NOTICE_NO,
 	      		NOTICE_TITLE,
-	      		NOTICE_CONTENT,
-	      		NOTICE_WRITER
+	      		NOTICE_WRITER,
+	      		NOTICE_CONTENT
 	      		)
       	VALUES
       			(
@@ -111,4 +109,32 @@ WHERE
       			#{noticeContent}
       			)
 	</insert>
+	
+	<select id="noticeFindById" parameterType="_int" resultType="notice">
+		<include refid="selectNotice"/>
+		
+		  FROM
+		  		NOTICE
+		 WHERE
+		 		NOTICE_NO = #{noticeNo}
+		 
+	</select>
+	
+		<update id="noticeDeleteById" parameterType="_int">
+		DELETE
+		  FROM
+				NOTICE
+	   	 WHERE
+	   	 		NOTICE_NO = #{noticeNo}
+	</update>
+	
+		<update id="noticeUpdate" parameterType="notice">
+		UPDATE
+				NOTICE
+		   SET
+		   		NOTICE_TITLE   = #{noticeTitle},
+		   		NOTICE_CONTENT = #{noticeContent}
+		 WHERE
+		 		NOTICE_NO = #{noticeNo}
+	</update>
 </mapper>

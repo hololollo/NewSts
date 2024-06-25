@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.ibatis.session.RowBounds;
 
+import com.kh.spring.board.model.vo.Board;
 import com.kh.spring.notice.model.vo.Notice;
 
 public interface NoticeService {
@@ -32,4 +33,11 @@ public interface NoticeService {
 	
 	// 게시글 작성
 	int insert(Notice notice);
+	
+	// 상세조회
+	Notice noticeFindById(int noticeNo);
+	// 게시글 삭제
+	int noticeDeleteById(int noticeNo);
+	// 게시글 수정
+	int noticeUpdate(Notice notice);
 }

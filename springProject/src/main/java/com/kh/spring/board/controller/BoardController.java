@@ -404,7 +404,7 @@ public class BoardController {
 	@PostMapping("boardDelete.do")
 	public String deleteById(int boardNo, String filePath, HttpSession session, Model model) {
 		if(boardService.delete(boardNo) > 0) {
-			if(!"".equals(filePath)) { // 파일이 저장되어 있는 경로 및 파일명이 빈문자열이 아닌 
+			if(filePath != null && !"".equals(filePath)) { // 파일이 저장되어 있는 경로 및 파일명이 빈문자열이 아닌 
 		// 만약 요청하는 view에서 filePath 오타가 발생했다면, null값이 발생하여 nullpointerException이 발생할 수도 있으니 주어를 변경해서 막아준다.
 			new File(session.getServletContext().getRealPath(filePath)).delete();
 			}
@@ -485,5 +485,13 @@ public class BoardController {
 		}
 		
 		return "resources/uploadFiles/" + changeName;
+	}
+	
+	@GetMapping("image-board")
+	public String images(Model model) {
+		// List<Board> images = boardService.selectImages();
+		model.addAttribute("board", boardService.selectImages());
+		
+		return "board/imageList";
 	}
 }

@@ -44,7 +44,7 @@
             <h2>공지사항 작성하기</h2>
             <br>
 
-            <form id="enrollForm" method="post" action="Ninsert.do">
+            <form id="enrollForm" method="post" action="notice-insert.do">
                 <table algin="center">
                     <tr>
                         <th><label for="title">제목</label></th>
@@ -52,7 +52,7 @@
                     </tr>
                     <tr>
                         <th><label for="writer">작성자</label></th>
-                        <td><input type="text" id="writer" class="form-control" value="${sessionScope.loginUser.userId }" name="noticeWriter" readonly></td>
+                        <td><input type="text" id="writer" class="form-control" value="${sessionScope.loginUser.userId == 'admin' }" name="noticeWriter" readonly></td>
                     </tr>
                     <tr>
                         <th><label for="content">내용</label></th>

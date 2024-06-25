@@ -21,7 +21,7 @@ public class NoticeRepository {
 	}
 
 	public int searchCount(SqlSessionTemplate sqlSession, Map<String, String> map) {
-		return sqlSession.selectOne("boardMapper.searchCount", map);
+		return sqlSession.selectOne("noticeMapper.searchCount", map);
 	}
 
 	public List<Notice> findByConditionAndKeyword(SqlSessionTemplate sqlSession, Map<String, String> map,
@@ -31,6 +31,18 @@ public class NoticeRepository {
 
 	public int insert(SqlSessionTemplate sqlSession, Notice notice) {
 		return sqlSession.insert("noticeMapper.insert", notice);
+	}
+
+	public Notice noticeFindById(SqlSessionTemplate sqlSession, int noticeNo) {
+		return sqlSession.selectOne("noticeMapper.noticeFindById", noticeNo);
+	}
+
+	public int noticeDeleteById(SqlSessionTemplate sqlSession, int noticeNo) {
+		return sqlSession.delete("noticeMapper.noticeDeleteById", noticeNo);
+	}
+
+	public int noticeUpdate(SqlSessionTemplate sqlSession, Notice notice) {
+		return sqlSession.update("noticeMapper.noticeUpdate", notice);
 	}
 
 	

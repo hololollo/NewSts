@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
+import com.kh.spring.board.model.vo.Board;
 import com.kh.spring.common.model.vo.PageInfo;
 import com.kh.spring.common.template.PageTemplate;
 import com.kh.spring.notice.model.service.NoticeService;
@@ -135,7 +137,7 @@ private final NoticeService noticeService;
 	}
 	
 	//검색기능
-	@GetMapping("Nsearch.do")
+	@GetMapping("notice-search.do")
 	public String search(String condition, @RequestParam(value="page", defaultValue = "1") int page, String keyword, Model model) {
 		
 		// log.info(" 검색 조건 : {}", condition);
@@ -184,7 +186,7 @@ private final NoticeService noticeService;
 		return "notice/insertForm";
 	}
 	//글등록
-	@PostMapping("Ninsert.do")
+	@PostMapping("notice-insert.do")
 	public String insert(Notice notice,
 			HttpSession session,
 			Model model) { 
@@ -201,7 +203,50 @@ private final NoticeService noticeService;
 			return "common/errorPage";
 		}
 		*/
-		
-		
-		 
+	@GetMapping("notice-detail")
+	public ModelAndView noticeFindById(int noticeNo, ModelAndView mv) {
+	    Notice notice = noticeService.noticeFindById(noticeNo);
+	    if (notice != null) {
+	        mv.addObject("notice", notice).setViewName("notice/noticeDetail");
+	    } else {
+	        mv.addObject("errorMsg", "게시글 상세조회에 실패했습니다.").setViewName("common/errorPage");
+	    }
+	    return mv;
+	}
+	@PostMapping("noticeDelete.do")
+	public String noticeDeleteById(int noticeNo, HttpSession session, Model model) {
+		int notice = noticeService.noticeDeleteById(noticeNo);
+		if(notice != 0) {
+			session.setAttribute("alertMsg", "게시글 삭제 성공");
+			return "redirect:/noticelist";
+		}else {
+			model.addAttribute("errorMsg", "게시글 삭제 실패");
+			return "common/errorPage";
+		}
+	}
+	// 수정하기
+	@PostMapping("noticeUpdateForm.do")
+	public ModelAndView updateForm(ModelAndView mv, int noticeNo) {
+		Notice notice = noticeService.noticeFindById(noticeNo);
+	    if (notice != null) {
+	        mv.addObject("notice", notice).setViewName("notice/noticeUpdate");
+	    } else {
+	        mv.addObject("errorMsg", "게시글 상세조회에 실패했습니다.").setViewName("common/errorPage");
+	    }
+	    return mv;
+	}
+	
+    @PostMapping("notice-update.do")
+    public String noticeUpdate(Notice notice, HttpSession session) {
+        // DB에서 Notice 테이블 업데이트
+        if (noticeService.noticeUpdate(notice) > 0) {
+            session.setAttribute("alertMsg", "수정완료");
+            return "redirect:notice-detail?noticeNo=" + notice.getNoticeNo();
+        } else {
+            session.setAttribute("errorMsg", "정보수정 실패");
+            return "common/errorPage";
+        }
+    }
 }
+		
+		
