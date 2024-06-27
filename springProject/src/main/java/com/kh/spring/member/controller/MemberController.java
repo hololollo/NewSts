@@ -380,5 +380,18 @@ public class MemberController {
 		// =>
 		return memberService.idCheck(checkId) > 0 ? "NNNNN" : "NNNNY";
 	}
+	@ResponseBody
+	@GetMapping("pwdCheck.do")
+	public String checkPwd(String checkPwd) {
+		// log.info(checkId);
+		
+		int checkResultPwd = memberService.pwdCheck(checkPwd); 
+		
+		if(checkResultPwd > 0) { // 일치하는 값
+			return "비밀번호가 일치합니다.";
+		}else {
+			return "비밀번호가 일치하지 않습니다.";
+		} 
+	}
 	
 }

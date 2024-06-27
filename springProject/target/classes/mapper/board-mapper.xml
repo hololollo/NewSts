@@ -196,22 +196,58 @@ WHERE
 	</select>
 	 -->
 	<select id="selectImages" resultType="board">
-      SELECT
-              CHANGE_NAME    changeName,
-              BOARD_TITLE    boardTitle,
-              USER_NAME       boardWriter,
-              BOARD_CONTENT    boardContent,
-              CREATE_DATE    createDate
-        FROM
-              BOARD, MEMBER
-       WHERE
-              BOARD.BOARD_WRITER = MEMBER.USER_ID
-         AND
-              CHANGE_NAME IS NOT NULL
-         AND 
+       SELECT
+               CHANGE_NAME    changeName,
+               BOARD_TITLE    boardTitle,
+               USER_NAME       boardWriter,
+               BOARD_CONTENT    boardContent,
+               CREATE_DATE    createDate
+         FROM
+               BOARD, MEMBER
+        WHERE
+               BOARD.BOARD_WRITER = MEMBER.USER_ID
+          AND
+               CHANGE_NAME IS NOT NULL
+          AND 
                BOARD.STATUS = 'Y'
-       ORDER
-          BY
-              BOARD_NO DESC
+        ORDER
+           BY
+               BOARD_NO DESC
+   </select>
+   
+   <select id="selectReply" resultType="reply" parameterType="_int">
+	   SELECT
+	   		   REPLY_NO replyNo,
+	   		   REPLY_CONTENT replyContent,
+	   		   REPLY_WRITER replyWriter,
+	   		   TO_CHAR(CREATE_DATE, 'YYYY-MM-DD') AS "createDate"
+	   	 FROM
+	   	  	   REPLY
+	   	WHERE
+	   	 	   STATUS = 'Y'
+	   	  AND
+	   	   	   REF_BNO = #{boardNo}
+	   	ORDER
+	   	   BY
+	   	 	   REPLY_NO DESC
+   </select>
+   
+   <select id="insertReply" parameterType="reply">
+   	   INSERT
+   		 INTO
+   		  	   REPLY
+   		  	   (
+   		  	   REPLY_NO,
+   		  	   REPLY_CONTENT,
+   		  	   REPLY_WRITER,
+   		  	   REF_BNO
+   		  	   )
+	   VALUES
+			   (
+			   SEQ_RNO.NEXTVAL,
+			   #{replyContent},
+			   #{replyWriter},
+			   #{refBoardNo}
+			   )
    </select>
 </mapper>

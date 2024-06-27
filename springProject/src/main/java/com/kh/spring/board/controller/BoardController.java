@@ -16,11 +16,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.google.gson.Gson;
 import com.kh.spring.board.model.service.BoardService;
 import com.kh.spring.board.model.vo.Board;
+import com.kh.spring.board.model.vo.Reply;
 import com.kh.spring.common.model.vo.PageInfo;
 import com.kh.spring.common.template.PageTemplate;
 
@@ -368,7 +371,9 @@ public class BoardController {
 		// 1. 데이터 가공 --> 매개변수(파라미터) 한개라서 할거 없음
 		// 2. 서비스호출
 		if(boardService.increaseCount(boardNo) > 0) {
-		mv.addObject("board", boardService.findById(boardNo)).setViewName("board/boardDetail");	
+		mv.addObject("board", boardService.findById(boardNo))
+		//3. 응답화면 지정
+		.setViewName("board/boardDetail");	
 		
 		} else {
 			mv.addObject("errorMsg", "게시글 상세조회에 실패했습니다.").setViewName("common/errorPage");
@@ -489,9 +494,24 @@ public class BoardController {
 	
 	@GetMapping("image-board")
 	public String images(Model model) {
+		
 		// List<Board> images = boardService.selectImages();
 		model.addAttribute("board", boardService.selectImages());
-		
 		return "board/imageList";
 	}
+	
+	// select면 get
+	@ResponseBody
+	@GetMapping(value="reply", produces="application/json; charset=UTF-8")
+	public String selectReply(int boardNo) {
+		return new Gson().toJson(boardService.selectReply(boardNo));	
+	}
+	// insert면 post
+	@ResponseBody
+	@PostMapping("reply")
+	public String saveReply(Reply reply) {
+		return boardService.insertReply(reply) > 0 ? "success" : "fail";
+	}
+	
+	
 }

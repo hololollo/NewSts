@@ -119,17 +119,31 @@
             <!-- 댓글 기능은 나중에 ajax 배우고 나서 구현할 예정! 우선은 화면구현만 해놓음 -->
             <table id="replyArea" class="table" align="center">
                 <thead>
-                    <tr>
-                        <th colspan="2">
-                            <textarea class="form-control" name="" id="content" cols="55" rows="2" style="resize:none; width:100%;"></textarea>
-                        </th>
-                        <th style="vertical-align:middle"><button class="btn btn-secondary">등록하기</button></th> 
-                    </tr>
-                    <tr>
-                        <td colspan="3">댓글(<span id="rcount">3</span>)</td>
-                    </tr>
+                	<c:choose>
+                		<c:when test="${empty sessionScope.loginUser }">
+                    	<tr> <!-- 댓글작성 영역, 로그인이 되어있지 않으면 로그인하라고 표시 -->
+                        	<th colspan="2">
+                            	<textarea class="form-control" name="" id="content" cols="55" rows="2" style="resize:none; width:100%;" readonly>로그인 후 이용가능합니다.</textarea>
+                        	</th>
+                        	<th style="vertical-align:middle"><button class="btn btn-secondary" disabled>등록하기</button></th> 
+                    	</tr>
+                    	</c:when>
+                    	<c:otherwise>
+                    	<tr> <!-- 댓글작성 영역 -->
+                       		<th colspan="2">
+                            	<textarea class="form-control" name="" id="content" cols="55" rows="2" style="resize:none; width:100%;"></textarea>
+                        	</th>
+                        	<th style="vertical-align:middle"><button onclick="insertReply();" class="btn btn-secondary">등록하기</button></th> 
+                    	</tr>
+                    	<tr>
+                        	<td colspan="3">댓글(<span id="rcount"></span>)</td>
+                    	</tr>
+                    	</c:otherwise>
+                    </c:choose>
                 </thead>
+                
                 <tbody>
+                	<!-- 
                     <tr>
                         <th>user02</th>
                         <td>ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ꿀잼</td>
@@ -145,10 +159,71 @@
                         <td>댓글입니다!!</td>
                         <td>2023-03-10</td>
                     </tr>
+                     -->
                 </tbody>
             </table>
         </div>
         <br><br>
+        
+        <script>
+        	function insertReply() {
+        		
+        		
+        		 if($('#content').val().trim() != ''){
+        			$.ajax({
+        				url : 'reply',
+        				data : {
+        					refBoardNo : ${ board.boardNo }, 
+        					replyContent : $('#content').val(), 
+        					replyWriter : '${ sessionScope.loginUser.userId }'
+        				},
+        				type : 'post',
+        				success : result => {
+        					
+        					console.log(result);
+        					if(result == 'success') {
+        						selectReply();
+        						$('#content').val('');
+        					}
+        				}
+        			});	
+        		}
+        		else {
+        			alertify.alert('제대로 입력해라');
+        		}
+        	}
+        
+
+        	$(() => {
+        		selectReply();
+        	})
+        
+        	function selectReply() {
+        		$.ajax({
+        			url : 'reply',
+        			type : 'get',
+        			data : {
+        				boardNo : ${ board.boardNo }
+        			},
+        			success : result => {
+        				
+        				let resultStr = '';
+        				
+        				for(let i in result) {
+        					resultStr += '<tr>'
+        							+ '<td>' + result[i].replyWriter + '</td>'
+        							+ '<td>' + result[i].replyContent + '</td>'
+        							+ '<td>' + result[i].createDate + '</td>'
+        							+ '</tr>';
+        				}
+        				$('#replyArea tbody').html(resultStr);
+        				$('#rcount').text(result.length);
+
+        			}
+        		})
+        	}
+
+        </script>
 
     </div>
     

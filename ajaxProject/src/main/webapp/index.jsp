@@ -62,7 +62,7 @@
 					- error : AJAX통신 실패 시 콜백 함수를 정의
 					- complete : AJAX통신이 성공하던지 실패하던지 무조건 끝나면 실행 할 콜백함수
 					- async : 서버와 비동기 처리방식 설정여부(기본값true)
-					- contentType : 오청시 데이터 인코딩 방식 정의(보내는 측의 데이터 인코딩)
+					- contentType : 요청시 데이터 인코딩 방식 정의(보내는 측의 데이터 인코딩)
 					- dataType : 서버에서 응답시 돌아오는 데이터의 형태 설정, 작성안하면 스마트하게 판단함
 							xml : 트리형태
 							json : 맵 형태의 구조(일반적인 데이터 구조)
@@ -100,13 +100,15 @@
 						amount : document.getElementById('amount').value  // key 0, 1.....
 							
 					},
-					success : result => { // 해당AJAX통신이 성공했을 때 수행되는 핸들러
+					success : result => { // 해당AJAX통신이 성공했을 때 수행되는 핸들러(컨트롤러단에서 작성한 것을 가져옴)
 						
 						//console.log(result);
 						//console.dir(document.getElementById('resultMsg'));
 						
-						const resultValue = result != 0 ? '선택하신 메뉴' + menuValue + ' ' + amountValue + '개의 가격은 : ' + result + '원 입니다.';
+						const resultValue = result !== 0 ? '선택하신 메뉴는 ${menuValue} ${amountValue} 개의 가격은 :  ${result} 원 입니다.' : "";
 						document.getElementById('resultMsg').innerHTML = resultValue;
+						
+						
 					},
 					error : () => {
 						console.log('아마 오타가 나지 않았을까?');
@@ -114,7 +116,160 @@
 				 });
 			 }
 		</script>
-	
-	
+		<br><br><br><br><br><br><br><br><br><br><br><br>
+		
+		<h3>2. DB에서 SELECT문을 이용해서 조회했다는 가정하에 VO객체를 응답받아서 화면상에 출력해보기!</h3>
+		
+		조회할 음식번호 : <input type="number" id="menuNo"/> <br><br>
+		
+		<button id="select-btn">조회</button><br>
+		
+		<div id='today-menu'>
+			
+		</div>
+		
+		<script>
+			window.onload = () => {
+				
+				document.getElementById('select-btn').onclick = () => {
+					$.ajax({
+							// ajax2.do	
+						url : 'ajax3.do',
+						type : 'get',
+						data : {
+							menuNumber : document.getElementById('menuNo').value
+						},
+						success : result => {
+							console.log(result);
+							
+							const obj =	{
+						        "menuNumber" : "1",
+							    "menuName" : "순두부",
+							    "price" : "9500",
+							    "material" : "순두부"
+						        };
+							    console.log(obj);
+							    
+							    const menu = '<ul>오늘의 메뉴 : '
+							    			+ '<li>'+result.menuName + '</li>'
+							    			+ '<li>'+result.price + '원</li>'
+							    			+ '<li>'+result.material + '</li>'
+							    			+ '</ul>'
+								document.getElementById('today-menu').innerHTML = menu;
+						},
+						error : e => {
+							console.log(e);
+						}
+					});
+				};
+			}	
+		</script>
+		
+		<br><br><br><br><br><br><br><br><br><br><br>
+		
+		<h3>3. 조회 후 리스트를 응답받아서 출력</h3>
+			<button onclick="findAll()">전체 메뉴 조회</button>
+			<br><br>
+			
+			<table border="1" id="find-result">
+				<thead>
+					<tr>
+						<th>메뉴명</th>
+						<th>가격</th>
+						<th>재료</th>
+					</tr>
+				</thead>
+				<tbody id="tbody">
+
+				</tbody>	
+			</table>
+			<script>
+				function findAll() {
+					$.ajax({
+						url : 'find.do',
+						type : 'get',
+						success : result => {
+							/*
+							<tr>
+							<td>김치찌개</td>
+							<td>12000</td>
+							<td>김치</td>
+							</tr>
+							*/
+							
+							const tbodyEl = document.getElementById('tbody');
+							
+							// console.log(result[0].menuName);
+							
+							result.map(o => {
+								//console.log(o);
+								//console.log(i);
+							const trEl = document.createElement('tr');
+							
+							
+							
+							const tdFirst = document.createElement('td');
+							const firstText = document.createTextNode(o.menuName);
+							tdFirst.style.width = '200px';
+							tdFirst.appendChild(firstText);
+							
+							const tdSecond = document.createElement('td');
+							const secondText = document.createTextNode(o.price);
+							tdSecond.style.width = '200px';
+							tdSecond.appendChild(secondText);
+							
+							const tdThird = document.createElement('td');
+							const thirdText = document.createTextNode(o.material);
+							tdThird.style.width = '100px';
+							tdThird.appendChild(thirdText);
+							
+							
+							trEl.appendChild(tdFirst);
+							trEl.appendChild(tdSecond);
+							trEl.appendChild(tdThird);
+							
+							tbodyEl.appendChild(trEl);
+							
+							/*
+							// 순수 자바스크립트를 사용해서
+							const trEl = document.createElement('tr');
+							// console.log(trEl);
+							
+							
+							const tdFirst = document.createElement('td');
+							// console.log(tdFirst);
+							
+							const firstText = document.createTextNode(result[0].menuName);
+							tdFirst.style.width = '200px';
+							
+							tdFirst.appendChild(firstText);
+							// console.log(tdFirst);
+							
+							const tdSecond = document.createElement('td');
+							const secondText = document.createTextNode(result[0].price);
+							tdSecond.style.width = '200px';
+							tdSecond.appendChild(secondText);
+							
+							const tdThird = document.createElement('td');
+							const thirdText = document.createTextNode(result[0].material);
+							tdThird.style.width = '100px';
+							tdThird.appendChild(thirdText);
+							
+							
+							trEl.appendChild(tdFirst);
+							trEl.appendChild(tdSecond);
+							trEl.appendChild(tdThird);
+							
+							tbodyEl.appendChild(trEl);
+							*/
+							});
+						},
+						});
+					
+				}
+			</script>
+			
+			
+			<br><br><br><br><br>		
 </body>
 </html>

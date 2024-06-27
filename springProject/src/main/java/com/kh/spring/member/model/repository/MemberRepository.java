@@ -33,5 +33,9 @@ public class MemberRepository {
 	public int idCheck(SqlSessionTemplate sqlSession, String checkId) {
 		return sqlSession.selectOne("memberMapper.idCheck", checkId);
 	}
+
+	public int pwdCheck(SqlSessionTemplate sqlSession, String checkPwd) {
+		return sqlSession.selectOne("memberMapper.pwdCheck", checkPwd);
+	}
 	
 }

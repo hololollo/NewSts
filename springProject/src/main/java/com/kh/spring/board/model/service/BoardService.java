@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.ibatis.session.RowBounds;
 
 import com.kh.spring.board.model.vo.Board;
+import com.kh.spring.board.model.vo.Reply;
 
 public interface BoardService {
 	//어떤 기능을 구현할 건지.
@@ -48,13 +49,17 @@ public interface BoardService {
 	int update(Board board);
 	
 	List<Board> selectImages();
+
+	
 	
 	
 	// ---- 댓글 관련 ---- (AJAX배우고)
 	
 	// 1. AJAX를 활용한 댓글 목록 조회 기능을 먼저 만들어보고 -> 2. Mybatis기술을 이용한 댓글 조회도 해볼거임.
-	
+	List<Reply>selectReply(int boardNo);
 	// 댓글 작성하기
+
+	int insertReply(Reply reply);
 	
 	// ---- Top-N ----
 }

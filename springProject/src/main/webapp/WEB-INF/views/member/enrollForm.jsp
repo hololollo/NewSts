@@ -21,13 +21,16 @@
                 <div class="form-group">
                     <label for="userId">* ID : </label>
                     <input type="text" class="form-control" id="userId" placeholder="Please Enter ID" name="userId" required> <br>
-					<div id="checkResult" style="display:none; font-size:0.7em;"></div><br><br>
+					<div id="checkResultId" style="display:none; font-size:1em;"></div><br><br>
                     <label for="userPwd">* Password : </label>
                     <input type="password" class="form-control" id="userPwd" placeholder="Please Enter Password" name="userPwd" required> <br>
 
                     <label for="checkPwd">* Password Check : </label>
                     <input type="password" class="form-control" id="checkPwd" placeholder="Please Enter Password" required> <br><!-- DB로 보낼 이유 없음. 단순확인용 -->
-
+					<div id="checkResultPwd" style="display:none; font-size:1em;"></div><br><br>
+                    
+                    
+                    
                     <label for="userName">* Name : </label>
                     <input type="text" class="form-control" id="userName" placeholder="Please Enter Name" name="userName" required> <br>
 
@@ -60,8 +63,12 @@
             	$(() => {
             		
             		const $idInput = $('.form-group #userId');
-            		const $checkResult = $('#checkResult');
+            		const $checkResultId = $('#checkResultId');
             		const $joinSubmit = $('#join-btn');
+            		// 비밀번호 확인용 속성 추가
+            		const $pwdInput = $('#userPwd'); // 비밀번호
+                    const $checkPwdInput = $('#checkPwd'); // 비밀번호확인
+                    const $checkResultPwd = $('#checkResultPwd');
             		
             		$idInput.keyup(() => {
             		
@@ -77,11 +84,11 @@
             						success : response => {
             							// console.log(response);
             							// NNNNN / NNNNY
-            							if(response.substr(4) === 'N') { // 중복이면
-            								$checkResult.show().css('color', 'crimson').text('중복입니다!');
-            							    $joinSubmit.attr('disabled', true);
+            							if(response.substr(4) === 'N') { // 중복이면 
+            								$checkResultId.show().css('color', 'crimson').text('중복입니다!');
+            							    $joinSubmit.attr('disabled', true); 
             							} else { // 중복이 아니면
-            								$checkResult.show().css('color','lightgreen').text('사용가능합니다!');
+            								$checkResultId.show().css('color','lightgreen').text('사용가능합니다!');
             								$joinSubmit.removeAttr('disabled');
             							}
             						},
@@ -91,10 +98,20 @@
             				});
             			}
             			else {
-            				$checkResult.hide();
+            				$checkResultId.hide();
             				$joinSubmit.attr('disabled', true);
             			}
             		});
+            		//비밀번호 확인
+            		 $checkPwdInput.keyup(() => {
+                         if ($pwdInput.val() === $checkPwdInput.val()) {
+                             $checkResultPwd.show().css('color', 'lightgreen').text('비밀번호가 일치합니다!');
+                             $joinSubmit.removeAttr('disabled'); // 입력할 수 있게.
+                         } else {
+                             $checkResultPwd.show().css('color', 'crimson').text('비밀번호가 일치하지 않습니다!');
+                             $joinSubmit.attr('disabled', true);
+                         }
+                     });
             	});
             </script>
             

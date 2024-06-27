@@ -98,4 +98,13 @@
 		 WHERE
 		 		USER_ID = #{checkId}
 	</select>
+	<!-- 비밀번호 확인용 쿼리문 -->
+	<select id="pwdCheck" parameterType="String" resultType="_int">
+		SELECT
+				COUNT(*)
+		  FROM
+		  		MEMBER
+		 WHERE
+		 		USER_PWD = #{checkPwd}
+	</select>
 </mapper>

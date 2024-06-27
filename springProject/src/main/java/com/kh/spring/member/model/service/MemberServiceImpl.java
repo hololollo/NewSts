@@ -50,4 +50,9 @@ public class MemberServiceImpl implements MemberService {
 		return memberRepository.idCheck(sqlSession, checkId);
 	}
 
+	@Override
+	public int pwdCheck(String checkPwd) {
+		return memberRepository.pwdCheck(sqlSession, checkPwd);
+	}
+	
 }
