@@ -212,6 +212,9 @@ public class MemberController {
 	@PostMapping("login.do")
 	public ModelAndView login(Member member, ModelAndView mv, HttpSession session) {
 		Member loginUser = memberService.login(member);
+		log.info("평문 : {}", member.getUserPwd());
+		String encPwd = bcryptPasswordEncoder.encode(member.getUserPwd());
+		log.info("암호문 : {}", encPwd );
 		
 		//matches()
 		// member => userId필드 : 사용자가 입력한 아이디값

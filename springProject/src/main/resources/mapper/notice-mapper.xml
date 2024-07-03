@@ -2,139 +2,64 @@
 <!DOCTYPE mapper
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="noticeMapper">
-
-	<!-- 중복되서 작성되는 항목 따로 빼서 selectNotice로 담아줌 -->
+<mapper namespace="com.kh.spring.notice.model.dao.NoticeMapper">
 	<sql id="selectNotice">
 		SELECT
 				NOTICE_NO noticeNo,
-	            NOTICE_TITLE noticeTitle,
-	            NOTICE_CONTENT noticeContent,
-	            NOTICE_WRITER noticeWriter,
-	            CREATE_DATE createDate	
+				NOTICE_TITLE noticeTitle,
+				NOTICE_WRITER noticeWriter,
+				NOTICE_CONTENT noticeContent,
+				CREATE_DATE createDate
+		  FROM
+		  		NOTICE
 	</sql>
-
-	<select id="noticeCount" resultType="int">   <!-- resultType과 parameterType의 차이점? -->
-		SELECT
-				COUNT(NOTICE_NO)
-		  FROM
-		  		NOTICE
-	</select>
 	
-	<select id="findAll" resultType="notice" parameterType="map">
-	
+	<select id="findAll" resultType="notice">
 	<include refid="selectNotice"/>
-  	  FROM
-            (SELECT 
-                    NOTICE_NO,
-                    NOTICE_TITLE,
-                  	NOTICE_WRITER,
-                  	NOTICE_CONTENT,
-                    CREATE_DATE,
-                    ROWNUM RNUM 
-              FROM
-                   	 (SELECT 
-                             NOTICE_NO,
-                             NOTICE_TITLE,
-                             NOTICE_WRITER,
-                             NOTICE_CONTENT,
-                             CREATE_DATE
-                        FROM
-                             NOTICE                              
-                       ORDER
-                          BY
-                             NOTICE_NO DESC))               
-WHERE
-      RNUM BETWEEN #{startValue} AND #{endValue} 
+	     ORDER
+		  	BY
+	  			NOTICE_NO DESC
 	</select>
 	
-	<!-- 검색조건에 부합하는 행의 개수 - 동적 sql(if)-->
-	<select id="searchCount" parameterType="hashmap" resultType="int">
-		SELECT
-        		COUNT(NOTICE_NO)
-		  FROM
-		        NOTICE
-		  <where>      
-		  <if test="condition == 'writer'">      
-	            NOTICE_WRITER LIKE '%' || #{keyword} || '%'
-	      </if>
-		  <if test="condition == 'title'">
-		        NOTICE_TITLE LIKE '%' || #{keyword} || '%'
-		  </if>
-		  <if test="condition == 'content'">
-		        NOTICE_CONTENT LIKE '%' || #{keyword} || '%'
-		  </if>
-		  </where>
-	</select>
-	
-	<!-- 검색 결과(Mybatis - 동적 sql(choose-whwen))-->
-	<select id="findByConditionAndKeyword" parameterType="hashmap" resultType="notice">
-	
+	<!-- 값을 noticeNo를 기준으로 불러옴(값을 notice로 반환) -->
+	<select id="findById" resultType="notice" parameterType="_int">
 	<include refid="selectNotice"/>
-	      FROM
-	      		NOTICE
-	    <where>  		
-	   	<choose>
-	   		<when test="condition == 'writer'">
-	   			NOTICE_WRITER LIKE '%' || #{keyword} || '%'
-	   		</when>
-	   		<when test="condition == 'title'">
-	   			NOTICE_TITLE LIKE '%' || #{keyword} || '%'
-	   		</when>
-			<otherwise>
-				NOTICE_CONTENT LIKE '%' || #{keyword} || '%'
-			</otherwise>
-    	</choose>
-    	</where>
-     	 ORDER
-     	    BY
-     			NOTICE_NO DESC
+		 WHERE
+				NOTICE_NO = #{noticeNo}
 	</select>
 	
-	<insert id="insert" parameterType="notice">
-		INSERT
-	      INTO
-	      		NOTICE
-	      		(
-	      		NOTICE_NO,
-	      		NOTICE_TITLE,
-	      		NOTICE_WRITER,
-	      		NOTICE_CONTENT
-	      		)
-      	VALUES
-      			(
-      			SEQ_NNO.NEXTVAL,
-      			#{noticeTitle},
-      			#{noticeWriter},
-      			#{noticeContent}
-      			)
-	</insert>
+<insert id="save" parameterType="notice">
+      INSERT
+        INTO
+              NOTICE
+      VALUES
+            (
+            SEQ_NNO.NEXTVAL,
+            #{noticeTitle},
+            #{noticeWriter},
+            #{noticeContent},
+            SYSDATE
+            )
+   </insert>
 	
-	<select id="noticeFindById" parameterType="_int" resultType="notice">
-		<include refid="selectNotice"/>
-		
-		  FROM
-		  		NOTICE
+	<delete id="delete" parameterType="_int">
+		DELETE
+				NOTICE
 		 WHERE
 		 		NOTICE_NO = #{noticeNo}
-		 
-	</select>
+	</delete>
 	
-		<update id="noticeDeleteById" parameterType="_int">
-		DELETE
-		  FROM
-				NOTICE
-	   	 WHERE
-	   	 		NOTICE_NO = #{noticeNo}
-	</update>
-	
-		<update id="noticeUpdate" parameterType="notice">
+	<update id="update" parameterType="notice">
 		UPDATE
 				NOTICE
 		   SET
-		   		NOTICE_TITLE   = #{noticeTitle},
+		   		NOTICE_TITLE = #{noticeTitle},
 		   		NOTICE_CONTENT = #{noticeContent}
 		 WHERE
 		 		NOTICE_NO = #{noticeNo}
+		   AND
+		   		NOTICE_WRITER = #{noticeWriter}
 	</update>
+	
+	
 </mapper>

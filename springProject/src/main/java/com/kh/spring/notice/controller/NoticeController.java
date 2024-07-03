@@ -1,252 +1,136 @@
 package com.kh.spring.notice.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.servlet.http.HttpSession;
-
-import org.apache.ibatis.session.RowBounds;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.kh.spring.board.model.vo.Board;
-import com.kh.spring.common.model.vo.PageInfo;
-import com.kh.spring.common.template.PageTemplate;
 import com.kh.spring.notice.model.service.NoticeService;
+import com.kh.spring.notice.model.vo.Message;
 import com.kh.spring.notice.model.vo.Notice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Controller
-@RequiredArgsConstructor
 @Slf4j
-
+@RestController
+@RequestMapping("/notice")
+@RequiredArgsConstructor
 public class NoticeController {
+	private final NoticeService noticeService;
 	
-private final NoticeService noticeService;
-	
-	
-	// localhost/spring/boardlist
-	@GetMapping("noticelist")
-	public String forwarding(@RequestParam(value="page", defaultValue="1") int page, Model model) {
+	@GetMapping
+	public ResponseEntity<Message> findAll() { // 응답하는 객체
 		
-		// return 전에 요청을 받은 시점에서 DB의 데이터를 가져와서 list로 반환해줌.
-
-		int listCount; // 현재 일반 게시판의 게시글 총 개수 => BOARD테이블로부터 SELECT COUNT(*)활용해서 조회
-		int currentPage; // 현재페이지(사용자가 요청한 페이지) => 앞에서 넘길것.
-		int pageLimit; // 페이지 하단에 보여질 페이징바의 최대 개수 => 10개로 고정 
-		int boardLimit; // 한 페이지에 보여질 게시글의 최대 개수 => 10개로 고정
-		
-		int maxPage; // 가장 마지막 페이지가 몇 번 페이지인지(총 페이지의 개수)
-		int startPage; // 그 화면상 하단에 보여질 페이징바의 시작하는 페이지넘버
-		int endPage; // 그 화면상 하단에 보여질 페이징바의 끝나는 페이지넘버
-		
-		// * listCount : 총 게시글의 수
-		listCount = noticeService.noticeCount();
-		
-		
-		// *currentPage : 현재 페이지(사용자가 요청한 페이지)
-		currentPage = page;
-		log.info("게시글의 총 개수 : {}, 현재 요청 페이지 : {}", listCount, currentPage);
-		
-		// * pageLimit : 페이징바의 최대개수
-		pageLimit = 10;
-		
-		// * boardLimit : 한 페이지에 보여질 게시글의 최대 개수
-		boardLimit = 10;
-		
-		maxPage = (int)Math.ceil((double)listCount / boardLimit);
-		
-
-		startPage = ((currentPage-1) / (pageLimit * pageLimit)) + 1;
-		
-		// *endPage : 페이지 하단에 보여질 페이징바의 끝 수
-		
-		
-		endPage = startPage + pageLimit - 1;
-		// startPage가 1이라서 endPage가 10이 들어갔는데 maxPage가 2인경우
-		// endPage를 maxPage값을 변경 
-		if(endPage > maxPage) {
-			endPage = maxPage;
+		List<Notice> noticeList = noticeService.findAll();
+		if(noticeList.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+								 .body(Message.builder()
+										 .message("조회결과가 존재하지 않아요 ㅠㅠ")
+										 .build());
 		}
 		
+		Message responseMsg = Message.builder().data(noticeList).message("조회 요청 성공~!").build();
 		
-		// 7개의 객체를 계속 들고다닐수가 없으니까 
-		// 클래스 / int[] / list / Map 중 택 1하여 값을 담고 넘긴다.
+		// log.info("조회된 공지사항 목록 : {}", noticesList);
 		
-		// PageInfo pageInfo = new PageInfo(listCount, currentPage, pageLimit, boardLimit, maxPage, startPage, endPage);
-		// 클래스에 넣는다 -> 필드 선언 순서를 모르면 와장창.
-		
-		
-		// Builder 애너테이션(매개변수가 사용될때 따라오는 애너테이션)을 쓰면
-		PageInfo pageInfo = PageInfo.builder()
-									.listCount(listCount)
-									.currentPage(currentPage)
-									.pageLimit(pageLimit)
-									.boardLimit(boardLimit)
-									.maxPage(maxPage)
-									.startPage(startPage)
-									.endPage(endPage)
-									.build(); // 각각의 필드에 객체를 담아서 빌드 (순서에 상관이 없다는 특징이 있다.)
-		
-		/*
-		 * boardLimit 이 10이라는 가정하에
-		 * currentPage == 1 => 시작값은 1, 끝값은 10
-		 * currentPage == 2 => 시작값은 11, 끝값은 20
-		 * currentPage == 3 => 시작값은 21, 끝값은 30
-		 * 
-		 * 시작값 = (currentPage -1) * boardLimit + 1;
-		 * 끝 값 = 시작값 + boardLimit - 1; 
-		 * 
-		 */
-								
-		
-		
-		
-		
-		// 전체 목록조회
-		Map<String,Integer> map = new HashMap();
-		
-		int startValue = (currentPage - 1) * boardLimit + 1;
-		int endValue = startValue + boardLimit - 1;
-		
-		map.put("startValue", startValue);
-		map.put("endValue", endValue);
-		
-		List<Notice> noticeList = noticeService.findAll(map);
-		
-		//log.info("조회된 게시글의 개수 : {}", noticeList.size());
-		//log.info("--------------");
-		//log.info("조회된 게시글 목록 : {}", noticeList);
-		
-		model.addAttribute("list", noticeList);
-		model.addAttribute("pageInfo", pageInfo);
-
-		return "notice/list";
+		return ResponseEntity.status(HttpStatus.OK).body(responseMsg);
+				
 	}
 	
-	//검색기능
-	@GetMapping("notice-search.do")
-	public String search(String condition, @RequestParam(value="page", defaultValue = "1") int page, String keyword, Model model) {
-		
-		// log.info(" 검색 조건 : {}", condition);
-		// log.info(" 검색 키워드 : {}", keyword);
-		
-		// 페이징 처리를 끝낸 후 검색결과를 들고가야함~!
-		
-		// 검색 경우의 수
-		// 조건(condition) : "writer", "title", "content"
-		// 사용자가 입력한 키워드(keyword) 뭐가 입력될지 모름. 담아서 간다. 
-		
-		// 클래스나 배열, 맵 가능.
-		Map<String, String> map = new HashMap();
-		map.put("condition", condition);
-		map.put("keyword", keyword);
-		// service로
-		
-		int searchCount = noticeService.searchCount(map);
-		log.info("검색 조건에 부합하는 행의 수 : {}", searchCount);
-		int currentPage = page;
-		int pageLimit = 5;
-		int boardLimit = 5;
-		
-		//pageTemplate클래스에서 가져와서(get) pageInfo에 담아줌
-		PageInfo pageInfo = PageTemplate.getPageInfo(searchCount, currentPage, pageLimit, boardLimit);
-		
-		// 마이바티스에서 제공해주는 rowBounds라는 클래스를 제공
-		
-		// offset(몇번 건너뛰고 가져갈 것인지 엑셀에서의 offset을 생각x ex. offset 4 => 50개를 조회하고 앞에 40를 제외하고 나머지를 들고간다.)
-		// limit(개수)
-		RowBounds rowBounds = new RowBounds((currentPage - 1) * boardLimit, boardLimit);
-		
-		List<Notice> noticeList = noticeService.findByConditionAndKeyword(map, rowBounds);
-		
-		model.addAttribute("list", noticeList);
-		model.addAttribute("pageInfo", pageInfo);
-		model.addAttribute("keyword", keyword);
-		model.addAttribute("condition", condition);
-		
-		return "notice/list";
-	}
 	
-	//글등록 넘어가기
-	@GetMapping("noticeForm.do")
-	public String noticeFormForwarding() {
-		return "notice/insertForm";
-	}
-	//글등록
-	@PostMapping("notice-insert.do")
-	public String insert(Notice notice,
-			HttpSession session,
-			Model model) { 
-		noticeService.insert(notice);
-		return "redirect:/noticelist";
-	}
 	/*
-		if(noticeService.insert(notice) > 0) {
-			session.setAttribute("alertMsg", "게시글 작성 성공~!");
-			return "redirect:/noticelist"; // 무조건 리다이렉트 해야함. 
+	 * 전체조회(Get)
+	 * 상세조회(Get)
+	 * 작성(Post)
+	 * 수정(Put)
+	 * 삭제(Delte)
+	 */
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<Message> findById(@PathVariable int id) {
 		
-		}else {
-			model.addAttribute("errorMsg", "게시글 작성 실패!");
-			return "common/errorPage";
+		Notice notice = noticeService.findById(id);
+		//조회결과가 없으면 null값이 반환
+		if(notice == null) {
+			return ResponseEntity.status(HttpStatus.OK)
+					             .body(Message.builder()
+								 .message("조회결과가 존재하지 않습니다.")
+								 .build());
 		}
-		*/
-	@GetMapping("notice-detail")
-	public ModelAndView noticeFindById(int noticeNo, ModelAndView mv) {
-	    Notice notice = noticeService.noticeFindById(noticeNo);
-	    if (notice != null) {
-	        mv.addObject("notice", notice).setViewName("notice/noticeDetail");
-	    } else {
-	        mv.addObject("errorMsg", "게시글 상세조회에 실패했습니다.").setViewName("common/errorPage");
-	    }
-	    return mv;
-	}
-	@PostMapping("noticeDelete.do")
-	public String noticeDeleteById(int noticeNo, HttpSession session, Model model) {
-		int notice = noticeService.noticeDeleteById(noticeNo);
-		if(notice != 0) {
-			session.setAttribute("alertMsg", "게시글 삭제 성공");
-			return "redirect:/noticelist";
-		}else {
-			model.addAttribute("errorMsg", "게시글 삭제 실패");
-			return "common/errorPage";
-		}
-	}
-	// 수정하기
-	@PostMapping("noticeUpdateForm.do")
-	public ModelAndView updateForm(ModelAndView mv, int noticeNo) {
-		Notice notice = noticeService.noticeFindById(noticeNo);
-	    if (notice != null) {
-	        mv.addObject("notice", notice).setViewName("notice/noticeUpdate");
-	    } else {
-	        mv.addObject("errorMsg", "게시글 상세조회에 실패했습니다.").setViewName("common/errorPage");
-	    }
-	    return mv;
+		Message responseMsg = Message.builder()
+							 .message("조회요청에 성공했습니다.")
+							 .data(notice)
+							 .build();
+		return ResponseEntity.status(HttpStatus.OK).body(responseMsg);
 	}
 	
-    @PostMapping("notice-update.do")
-    public String noticeUpdate(Notice notice, HttpSession session) {
-        // DB에서 Notice 테이블 업데이트
-        if (noticeService.noticeUpdate(notice) > 0) {
-            session.setAttribute("alertMsg", "수정완료");
-            return "redirect:notice-detail?noticeNo=" + notice.getNoticeNo();
-        } else {
-            session.setAttribute("errorMsg", "정보수정 실패");
-            return "common/errorPage";
-        }
-    }
+	@PostMapping
+	   public ResponseEntity<Message> save(Notice notice) {
+	      
+	      log.info("이게 노티스..? {}", notice);
+	      
+	      
+	      
+	      if("".equals(notice.getNoticeTitle()) || "".equals(notice.getNoticeContent()) || "".equals(notice.getNoticeWriter())) {
+	         return ResponseEntity.status(HttpStatus.OK).body(Message.builder()
+	                                                 .message("서비스 요청 실패")
+	                                                 .data("필수 파라미터가 누락되었습니다.")
+	                                                 .build());
+	      }
+	      int result = noticeService.save(notice);
+	      
+	      if(result == 0) {
+	         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Message.builder()
+	                                                          .message("추가실패..ㅠ")
+	                                                          .build());
+	      }
+	      
+	      Message responseMsg = Message.builder().data("공지사항 추가 성공~~!")
+	                                     .message("서비스 요청 성공~~!")
+	                                      .build();
+	      
+	      return ResponseEntity.status(HttpStatus.OK).body(responseMsg);
+	   }
+	
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Message> deleteById(@PathVariable int id) {
+		int result = noticeService.delete(id);
+		// 두명이서 보다가 한명이 이미 삭제를 누른상태에서 나머지한명은 아직 새로고침이 되지 않은상태에서 다시한번 삭제를 누르게되면 이미 없는것을 삭제하는거니까 0이 나올수도 있다.
+		if(result == 0) {
+			return ResponseEntity.status(HttpStatus.OK).body(Message.builder()
+					.message("게시글이 존재하지 않음.").build());
+			
+		}
+		Message responseMsg = Message.builder().data("삭제성공!").message("서비스처리에 성공했어요~!").build();
+		return ResponseEntity.status(HttpStatus.OK).body(responseMsg);
+		//공공데이터 하면서..
+	}
+	// 공지사항 수정
+	// get방식은 requestParam으로 받는다.(http의 헤더영역)
+	// put은 바디영역이기 때문에 requestBody로
+	
+	@PutMapping
+	public ResponseEntity<Message> update(@RequestBody Notice notice) {
+		log.info("노티스 잘 넘어가나? {}", notice);
+		int result = noticeService.update(notice);
+		
+		if(result == 0) {
+			// 응답객체 의 서버응답상태가 괜찮으면 메세지를 표시하는데, 메세지는 공지사항 변경실패.
+			return ResponseEntity.status(HttpStatus.OK).body(Message.builder().message("공지사항 변경 실패").build());
+		}
+		
+		Message responseMsg = Message.builder().data(result).message("공지사항 변경 성공~!").build();
+		
+		
+		return ResponseEntity.status(HttpStatus.OK).body(responseMsg);
+	}
 }
-		
-		

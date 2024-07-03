@@ -250,4 +250,67 @@ WHERE
 			   #{refBoardNo}
 			   )
    </select>
+   
+   <resultMap id="boardResultSet" type="board">
+   		<id column="BOARD_NO" property="boardNo" />
+   		<result column="BOARD_TITLE" property="boardTitle"/>
+   		<result column="BOARD_CONTENT" property="boardContent"/>
+   		<result column="BOARD_WRITER" property="boardWriter"/>
+   		<result column="COUNT" property="count"/>
+   		<result column="ORIGIN_NAME" property="originName"/>
+   		<result column="CHANGE_NAME" property="changeName"/>
+   		<result column="B_CREATE_DATE" property="createDate"/>
+   		<collection resultMap="replyResultSet" property="replyList" />
+   </resultMap>
+   
+   <resultMap id="replyResultSet" type="reply">
+   		<id column="REPLY_NO" property="replyNo" />
+   		<result column="REPLY_CONTENT" property="replyContent"/>
+   		<result column="REPLY_WRITER" property="replyWriter"/>
+   		<result column="R_CREATE_DATE" property="createDate"/>
+   		<result column="REF_BNO" property="refBoardNo"/>
+   </resultMap>
+   
+   <select id="boardAndReply" parameterType="_int" resultMap="boardResultSet">
+       SELECT
+		        BOARD_NO,
+		        BOARD_TITLE,
+		        BOARD_CONTENT,
+		        BOARD_WRITER,
+		        COUNT,
+		        ORIGIN_NAME,
+		        CHANGE_NAME,
+		        BOARD.CREATE_DATE B_CREATE_DATE,
+		        REPLY_NO,
+		        REPLY_CONTENT,
+		        REPLY_WRITER,
+		        REF_BNO,
+		        REPLY.CREATE_DATE R_CREATE_DATE
+   	     FROM
+                BOARD
+         LEFT
+         JOIN 
+                REPLY ON(BOARD_NO = REF_BNO)
+        WHERE
+                BOARD_NO = #{boardNo}
+  </select>
+  
+  <select id="findTopFiveBoard" resultType="board">
+	<include refid="selectBoard" />
+ 	 FROM (SELECT
+	                BOARD_NO,
+	                BOARD_TITLE,
+	                BOARD_WRITER,
+	               	BOARD_CONTENT,
+	                COUNT,
+	                CREATE_DATE,
+	                ORIGIN_NAME,
+	                CHANGE_NAME
+          	 FROM
+                    BOARD
+            ORDER
+               BY
+                    COUNT DESC)
+	WHERE ROWNUM BETWEEN 1 AND 5
+  </select>
 </mapper>

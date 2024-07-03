@@ -61,5 +61,11 @@ public interface BoardService {
 
 	int insertReply(Reply reply);
 	
+	//Board랑 Board에 딸린 Reply랑 같이 조회
+	Board boardAndReply(int boardNo);
+
+	
+	
 	// ---- Top-N ----
+	List<Board> findTopFiveBoard(); // 게시글 정보를 리스트에 담아서 넘겨줌
 }

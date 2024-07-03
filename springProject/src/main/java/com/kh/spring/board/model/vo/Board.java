@@ -1,5 +1,7 @@
 package com.kh.spring.board.model.vo;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +23,8 @@ public class Board {
 	private int count;
 	private String createDate;
 	private String status;
+	private List<Reply> replyList;
+	
 	
 	// 내가 쓰는 기술, sql테이블에 따라 모양이 달라짐.
 	

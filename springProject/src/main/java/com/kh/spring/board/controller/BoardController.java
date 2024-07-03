@@ -34,6 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class BoardController {
+	
+	
 	private final BoardService boardService;
 	
 	
@@ -512,6 +514,15 @@ public class BoardController {
 	public String saveReply(Reply reply) {
 		return boardService.insertReply(reply) > 0 ? "success" : "fail";
 	}
-	
-	
+	@ResponseBody
+	@GetMapping("board-reply")
+	public Board boardAndReply(int boardNo) {
+		
+		return boardService.boardAndReply(boardNo);
+	}
+	@GetMapping("var")
+	public String varForward() {
+		
+		return "common/variable";
+	}
 }
