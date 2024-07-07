@@ -23,8 +23,12 @@ public class ForwardController {
 	public String map() {
 		return "kakao/map";	
 	}
-	@GetMapping("food")
+	@GetMapping("foods")
 	public String food() {
 		return "busan/busan";
+	}
+	@GetMapping("login")
+	public String login() {
+		return "kakao/kakao-login";
 	}
 }

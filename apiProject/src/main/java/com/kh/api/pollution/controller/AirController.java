@@ -59,7 +59,7 @@ public class AirController {
 	}
 	
 	
-	@GetMapping(value="/xml", produces="application/json; charset=UTF-8")
+	@GetMapping(value="/xml", produces="application/xml; charset=UTF-8")
 	public String xmlPollution(String sidoName) throws IOException {
 		
 		StringBuilder sb = new StringBuilder();

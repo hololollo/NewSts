@@ -23,7 +23,7 @@ public class BeachController {
 		sb.append("?serviceKey=");
 		sb.append(AirController.SERVICE_KEY);
 		sb.append("&pageNo=" + pageNo);
-		sb.append("$numOfRows=10");
+		sb.append("&numOfRows=10");
 		sb.append("&resultType=json"); // 리턴타입 아니다. 문서확인
 		
 		String url = sb.toString();

@@ -46,6 +46,7 @@
 							+ '<input type="hidden" name="title" value="' + item.MAIN_TITLE + '"/>'
 							+ '<input type="hidden" name="lat" value="' + item.LAT + '"/>'
 							+ '<input type="hidden" name="lng" value="' + item.LNG + '"/>'
+							+ '<input type="hidden" name="img" value="' + itemImg + '"/>'
 							+ '<input type="hidden" name="description" value="' + item.ITEMCNTNTS + '"/>'
 							+ '<button class="btn btn-sm btn-success">지도보기</button>'
 							+ '</form>'

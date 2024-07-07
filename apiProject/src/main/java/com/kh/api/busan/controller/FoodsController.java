@@ -23,7 +23,8 @@ public class FoodsController {
 		
 		sb.append("http://apis.data.go.kr/6260000/FoodService/getFoodKr");
 		sb.append("?serviceKey=");
-		sb.append(AirController.SERVICE_KEY);
+		sb.append(AirController.SERVICE_KEY);  
+		// 요구서에 작성되어있는 순서와는 상관없다. 들어가야하는거 다 들어가기만 하면 된다.
 		sb.append("&pageNo=" + pageNo);
 		sb.append("&numOfRows=10");
 		sb.append("&resultType=json"); // 리턴타입 아니다. 문서확인

@@ -86,8 +86,8 @@ public class ApiJavaApp {
 		}
 		*/
 		
-		// json으로 받으면 한줄로 오기 때문에 데이터를 가공해줘야함.
-		String responseJson = br.readLine();
+		// json으로 받으면 한줄로 오기 때문에 ※데이터를 가공해줘야함.
+		
 		//System.out.println(responseJson);
 		/*
 		AirVO air = new AirVO();
@@ -100,7 +100,10 @@ public class ApiJavaApp {
 		// JSONObject, JSONArray => 자바 데이터 => JSON으로 (JSON라이브러리)
 		
 		// 파싱을 하고싶은 문자열 데이터를 가져다가 넣음. getAsJsonObject를 이용하여 반환
+		//  한 줄로 이루어진 JSON 데이터일 경우, 이 메서드로 전체 응답을 읽을 수 있다. (system.out.println()으로 찍어보자.)
+		String responseJson = br.readLine();
 		JsonObject jsonObj = JsonParser.parseString(responseJson).getAsJsonObject();
+		// JsonParser는 문자열을 JSON 데이터 구조로 변환하는 데 사용
 		// System.out.println(responseJson); // String
 		// System.out.println(jsonObj); // JsonObject
 		

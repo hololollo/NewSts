@@ -56,28 +56,27 @@
   	
   	<script>
   		$(() => {
-  					//버튼을 클릭하면
+  			// 버튼을 클릭하면
   			$('#btn-JSON').on('click', () => {
-  				
-  				//sidoName 
+  				// sidoName
   				const selectValue = $('#sidoName').val();
   				
-  				//ajax 요청
+  				// ajax 요청
   				$.ajax({
-  					url : 'pollution',
-  					data : {
+  					url: 'pollution',
+  					data: {
   						sidoName : selectValue
   					},
-  					type : 'get',
-  					success : result => {
+  					type: 'get',
+  					success: result => {
   						// console.log(result);
   					
   						const items = result.response.body.items;
   					
   						let strEl = '';
   						
-  						for(let i in items) {
-  							const item = items[i];
+  						for (let i in items) {
+  							const item = items[i]; // 여기서 item 변수 참조 오류 수정
   							
   							strEl += '<tr>'
   								+ '<td>' + item.stationName + '</td>'
@@ -85,57 +84,52 @@
   								+ '<td>' + item.o3Value + '</td>'
   								+ '<td>' + item.pm10Value + '</td>'
   								+ '<td>' + item.khaiValue + '</td>'
-  								+ '</tr>'
-  						};
+  								+ '</tr>';
+  						}
   						$('tbody').html(strEl);
   					}
   				});
   			});
   					
-  					$('#btn-xml').on('click', () => {
+  			$('#btn-xml').on('click', () => {
+  				$.ajax({
+  					url: 'pollution/xml',
+  					data: {
+  						sidoName: $('#sidoName').val()
+  					},
+  					type: 'get',
+  					success: result => {
+  						// console.log(result);
+  						// console.log($$(result).find('item'));
+  						// XML 형식의 응답 데이터를 받을 때
+  						// jQuery 선택자를 이용해서 => jQuery 객체
+  						// find() : 기준이 되는 요소의 하위 요소들 중 특정 요소를 찾을 때 사용
   						
-  						$.ajax({
-  							url : 'pollution/xml',
-  							data : {
-  								sidoName : $('#sidoName').val()
-  							},
-  							type : 'get',
-  							success : result => {
-  								
-  								// console.log(result);
-  								// console.log($$(result).find('item'));
-  								// XML형식의 응답데이터를 받았을 때
-  								// jQuery 선택자를 이용해서 => jQuery 객체
-  								// find() : 기준이 되는 요소의 하위 요소들 중 특정 요소를 찾을 때 사용
-  								
-  								// 1. 응답데이터에서 실제 화면에 출력해야하는 데이터가 담겨있는 요소를 선택
-  								const items = $(result).find('item');
-  								
-  								// 2. 반복문을 통해서 실제 데이터가 담긴 요소들에 접근해서 동적으로 요소를 만들기
-  								let value = '';
-  								items.each((i, item) => { // i에는 index, item에는 element
-  									// console.log(i + '번째 요소 : ');
-  									// console.log(item);
-  									// console.log($(item).find('stationName').text());
-  								
-  									value += '<tr>'
-  										+ '<td>' + $(item).find('stationName').text() + '</td>'
-  										+ '<td>' + $(item).find('dataTime').text() + '</td>'
-  										+ '<td>' + $(item).find('o3Value').text() + '</td>'
-  										+ '<td>' + $(item).find('pm10Value').text() + '</td>'
-  										+ '<td>' + $(item).find('khaiValue').text() + '</td>'
-  										+ '</tr>'
-  								});
-  								
-  								// 3. 출력
-  								$('tbody').html(value);
-  							}
-  							
+  						// 1. 응답 데이터에서 실제 화면에 출력해야 하는 데이터가 담겨있는 요소를 선택
+  						const items = $(result).find('item');
+  						
+  						// 2. 반복문을 통해서 실제 데이터가 담긴 요소들에 접근해서 동적으로 요소를 만들기
+  						let value = '';
+  						items.each((i, item) => { // i에는 index, item에는 element
+  							// console.log(i + '번째 요소 : ');
+  							// console.log(item);
+  							// console.log($(item).find('stationName').text());
+  						
+  							value += '<tr>'
+  								+ '<td>' + $(item).find('stationName').text() + '</td>'
+  								+ '<td>' + $(item).find('dataTime').text() + '</td>'
+  								+ '<td>' + $(item).find('o3Value').text() + '</td>'
+  								+ '<td>' + $(item).find('pm10Value').text() + '</td>'
+  								+ '<td>' + $(item).find('khaiValue').text() + '</td>'
+  								+ '</tr>';
   						});
-  					});
-  			
+  						
+  						// 3. 출력
+  						$('tbody').html(value);
+  					}
+  				});
+  			});
   		});
   	</script>
-  
 </body>
 </html>

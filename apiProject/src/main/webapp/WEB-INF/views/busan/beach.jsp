@@ -54,9 +54,9 @@
 					
 					strEl += '<tr>'
 						+ '<td>' + item.inspecArea + '</td>'
-						+ '<td>' + item.water1 + '</td>'
-						+ '<td>' + item.water2 + '</td>'
-						+ '<td>' + item.inpecYm + '</td>'
+						+ '<td>' + item.water01 + '</td>'
+						+ '<td>' + item.water02 + '</td>'
+						+ '<td>' + item.inspecYm + '</td>'
 						+ '</tr>'
 				};
 				$('tbody').html(strEl);
