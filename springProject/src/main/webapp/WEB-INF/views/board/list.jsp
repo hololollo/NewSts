@@ -58,7 +58,7 @@
             <br>
             <br>
      <!-- 글 목록 --> 
-            <table id="boardList" class="table table-hover" align="center">
+            <table id="boardList" class="table table-hover">
                 <thead>
                     <tr>
                         <th>글번호</th>

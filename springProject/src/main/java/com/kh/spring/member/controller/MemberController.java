@@ -1,7 +1,9 @@
 package com.kh.spring.member.controller;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,6 +30,7 @@ public class MemberController {
 	// final : 객체의 불변성을 보장할 수 있음.
 	private final MemberService memberService;
 	private final BCryptPasswordEncoder bcryptPasswordEncoder; // spring-security.xml 빈등록
+	private final JavaMailSender sender;
 	
 	/*
 	@RequestMapping("login.do") // RequestMapping타입의 애노테이션을 붙임으로서 HandlerMapping 등록
@@ -395,6 +398,11 @@ public class MemberController {
 		}else {
 			return "비밀번호가 일치하지 않습니다.";
 		} 
+	}
+	
+	@PostMapping("auth-mail")
+	public void authMailService(String email, HttpServletRequest request) {
+		String remoteAddr = request.getRemoteAddr();
 	}
 	
 }

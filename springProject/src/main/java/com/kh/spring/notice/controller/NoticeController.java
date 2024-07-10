@@ -34,11 +34,11 @@ public class NoticeController {
 		if(noticeList.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 								 .body(Message.builder()
-										 .message("조회결과가 존재하지 않아요 ㅠㅠ")
+										 .msg("조회결과가 존재하지 않아요 ㅠㅠ")
 										 .build());
 		}
 		
-		Message responseMsg = Message.builder().data(noticeList).message("조회 요청 성공~!").build();
+		Message responseMsg = Message.builder().data(noticeList).msg("조회 요청 성공~!").build();
 		
 		// log.info("조회된 공지사항 목록 : {}", noticesList);
 		
@@ -63,11 +63,11 @@ public class NoticeController {
 		if(notice == null) {
 			return ResponseEntity.status(HttpStatus.OK)
 					             .body(Message.builder()
-								 .message("조회결과가 존재하지 않습니다.")
+								 .msg("조회결과가 존재하지 않습니다.")
 								 .build());
 		}
 		Message responseMsg = Message.builder()
-							 .message("조회요청에 성공했습니다.")
+							 .msg("조회요청에 성공했습니다.")
 							 .data(notice)
 							 .build();
 		return ResponseEntity.status(HttpStatus.OK).body(responseMsg);
@@ -82,7 +82,7 @@ public class NoticeController {
 	      
 	      if("".equals(notice.getNoticeTitle()) || "".equals(notice.getNoticeContent()) || "".equals(notice.getNoticeWriter())) {
 	         return ResponseEntity.status(HttpStatus.OK).body(Message.builder()
-	                                                 .message("서비스 요청 실패")
+	                                                 .msg("서비스 요청 실패")
 	                                                 .data("필수 파라미터가 누락되었습니다.")
 	                                                 .build());
 	      }
@@ -90,12 +90,12 @@ public class NoticeController {
 	      
 	      if(result == 0) {
 	         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Message.builder()
-	                                                          .message("추가실패..ㅠ")
+	                                                          .msg("추가실패..ㅠ")
 	                                                          .build());
 	      }
 	      
 	      Message responseMsg = Message.builder().data("공지사항 추가 성공~~!")
-	                                     .message("서비스 요청 성공~~!")
+	                                     .msg("서비스 요청 성공~~!")
 	                                      .build();
 	      
 	      return ResponseEntity.status(HttpStatus.OK).body(responseMsg);
@@ -107,10 +107,10 @@ public class NoticeController {
 		// 두명이서 보다가 한명이 이미 삭제를 누른상태에서 나머지한명은 아직 새로고침이 되지 않은상태에서 다시한번 삭제를 누르게되면 이미 없는것을 삭제하는거니까 0이 나올수도 있다.
 		if(result == 0) {
 			return ResponseEntity.status(HttpStatus.OK).body(Message.builder()
-					.message("게시글이 존재하지 않음.").build());
+					.msg("게시글이 존재하지 않음.").build());
 			
 		}
-		Message responseMsg = Message.builder().data("삭제성공!").message("서비스처리에 성공했어요~!").build();
+		Message responseMsg = Message.builder().data("삭제성공!").msg("서비스처리에 성공했어요~!").build();
 		return ResponseEntity.status(HttpStatus.OK).body(responseMsg);
 		//공공데이터 하면서..
 	}
@@ -120,15 +120,15 @@ public class NoticeController {
 	
 	@PutMapping
 	public ResponseEntity<Message> update(@RequestBody Notice notice) {
-		log.info("노티스 잘 넘어가나? {}", notice);
+		// log.info("노티스 잘 넘어가나? {}", notice);
 		int result = noticeService.update(notice);
 		
 		if(result == 0) {
-			// 응답객체 의 서버응답상태가 괜찮으면 메세지를 표시하는데, 메세지는 공지사항 변경실패.
-			return ResponseEntity.status(HttpStatus.OK).body(Message.builder().message("공지사항 변경 실패").build());
+			// 응답객체의 서버응답상태가 괜찮으면 메세지를 표시하는데, 메세지는 공지사항 변경실패.
+			return ResponseEntity.status(HttpStatus.OK).body(Message.builder().msg("공지사항 변경 실패").build());
 		}
 		
-		Message responseMsg = Message.builder().data(result).message("공지사항 변경 성공~!").build();
+		Message responseMsg = Message.builder().data(result).msg("공지사항 변경 성공~!").build();
 		
 		
 		return ResponseEntity.status(HttpStatus.OK).body(responseMsg);

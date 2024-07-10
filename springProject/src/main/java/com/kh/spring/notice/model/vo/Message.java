@@ -7,6 +7,6 @@ import lombok.Builder;
 @AllArgsConstructor
 public class Message {
 	
-	private String message;
+	private String msg;
 	private Object data; // 여기저기서 쓸 수 있는 거
 }

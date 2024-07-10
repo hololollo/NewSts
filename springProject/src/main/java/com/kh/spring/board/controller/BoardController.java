@@ -86,7 +86,7 @@ public class BoardController {
 		 *  106         /        10                  ==    10.6 -> 11페이지
 		 *  111         /        10                  ==    11.1 -> 12페이지
 		 * 
-		 *   -> 나눗셈 결과에 소숫점을 붙여서 올림처리 할 경우 maxPage가 됨!!
+		 *   -> 나눗셈 결과에 소숫점을 붙여서 올림(.ceil)처리 할 경우 maxPage가 됨!!
 		 *   
 		 *   코드를 작성하는 순서를 풀어보자면
 		 *   1. listCount를 double로 변환
@@ -461,8 +461,6 @@ public class BoardController {
 			session.setAttribute("errorMsg", "정보수정 실패");
 			return "common/errorPage";
 		}
-		
-		
 	}
 	public String saveFile(MultipartFile upfile, HttpSession session) {
 		

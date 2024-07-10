@@ -61,6 +61,24 @@
 	 	<property name="maxUploadSize" value="100000000" />
 	 	<property name="maxInMemorySize" value="100000000" />
 	 </bean>
-	 <!-- namespaces에서 체크. sqlSession을 스프링이 자동으로 넣어주는 태그 -->
+	 
+	 <!-- namespaces에서 체크. sqlSession을 스프링이 자동으로 넣어주는 태그 마이바티스를 이용해서 dao를 mapper로 쓸때 사용-->
 	 <mybatis-spring:scan base-package="com.kh.spring.notice.model.dao"/>
+	 
+	 
+	 <!-- 메일 전송 도구 등록 -->
+	 <bean class="org.springframework.mail.javamail.JavaMailSenderImpl" id="sender">
+	 	<property name="host" value="smtp.gmail.com" />
+	 	<property name="port" value="587" />
+	 	<property name="username" value="kangmh1021" />
+	 	<property name="password" value="djkh htdd exfs gzqf" /> <!-- 지우고 깃허브 올리기 -->
+	 	<property name="javaMailProperties">
+	 		<props>
+	 			<prop key="mail.smtp.auth">true</prop>
+	 			<prop key="mail.smtp.starttls.enable">true</prop>
+	 		</props>
+	 	</property> 
+	 </bean>
+	 
+	 
 </beans>

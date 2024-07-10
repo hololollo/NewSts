@@ -299,7 +299,7 @@
 				url : 'notice',
 				type : 'get',
 				success : response => {
-					console.log(response);
+					// console.log(response);
 					const noticeList = response.data;
 					
 					const outerDiv = document.createElement('div');
